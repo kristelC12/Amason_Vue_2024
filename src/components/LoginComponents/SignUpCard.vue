@@ -19,9 +19,7 @@
 </template>
 
 <script>
-export default {
-  // Script para la lógica del componente, si es necesario
-};
+
 </script>
 
 <style scoped>

@@ -53,7 +53,7 @@ header {
 
 @media (max-width: 1034px) {
   .navbar {
-    width: 1034px; /* Fija el ancho a 1034px cuando la ventana sea menor o igual a 1034px */
+    width: 1034px;
   }
 }
 
