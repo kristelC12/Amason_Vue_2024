@@ -45,7 +45,7 @@ header {
 
 
 .container-router {
-  display: flex;
+  display: block;
   justify-content: center;
   align-items: center;
   
