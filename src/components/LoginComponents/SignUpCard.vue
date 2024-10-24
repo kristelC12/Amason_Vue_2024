@@ -80,7 +80,7 @@ export default {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
 
         // Redirigir a la página principal o al menú
-        this.$router.push('/')
+        this.$emit('toggle')
       } catch (error) {
         console.error('Error en el registro:', error)
         alert('Hubo un error en el registro. Verifica los datos ingresados.')
