@@ -1,7 +1,5 @@
-
 import Vuex from 'vuex';
-import api from '../services/api';  // Asegúrate de que la ruta al archivo de la API sea correcta
-
+import api from '../services/api';
 
 export default new Vuex.Store({
   state: {
@@ -26,11 +24,9 @@ export default new Vuex.Store({
         if (!userId) {
           throw new Error('User ID not found in localStorage');
         }
-        const response = await api.get(`/cart/view?userId=${userId}`);
-        commit('setCart', response.data.listcartproducts);
-        commit('setTotalAmount', response.data.totalamount);
-        
-        console.log('Total amount fetched:', response.data.totalamount);
+        const response = await api.get(`/cart/${userId}`);
+        commit('setCart', response.data.cart_products);
+        commit('setTotalAmount', response.data.total_amount);
       } catch (error) {
         console.error('Error fetching cart items:', error);
       }
@@ -39,5 +35,11 @@ export default new Vuex.Store({
   getters: {
     cartItems: (state) => state.cart,
     totalAmount: (state) => state.totalAmount,
+    formattedTotalAmount: (state) => {
+      return new Intl.NumberFormat('es-CR', {
+        style: 'currency',
+        currency: 'CRC',
+      }).format(state.totalAmount); // Formatea el total a colones
+    },
   },
 });

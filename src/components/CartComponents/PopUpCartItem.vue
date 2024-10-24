@@ -1,39 +1,37 @@
 <template>
-    <ul>
-      <li class="minicart--item" v-for="(product, index) in products" :key="index">
+  <ul>
+    <li class="minicart--item" v-for="(product, index) in cartItems" :key="index">
+      <div class="minicart--item--details--container">
         <div class="placeholder"></div>
-        <h1 class="title">{{ product.name }}</h1>
-        <p class="material">Vendedor: {{ product.vendedor }}</p>
-        <p class="price">Cantidad: {{ product.quantity }}</p>
-        <p class="price">Precio: {{ product.price }}</p>
-        <p class="remove">
-          <a href="#" @click.prevent="removeProduct(index)">
-            <i class="fa fa-trash-o"></i> Eliminar del carrito
-          </a>
-        </p>
-      </li>
-    </ul>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        products: [
-          { name: 'Producto 01', vendedor: 'siwi', material: 'Material 01', size: '10x10', price: 90.00, quantity: 1 },
-          { name: 'Producto 02', vendedor: 'siwi',  material: 'Material 02', size: '15x15', price: 120.00, quantity: 2 },
-          { name: 'Producto 03', vendedor: 'siwi', material: 'Material 03', size: '20x20', price: 150.00, quantity: 1 }
-        ],
-      };
-    },
-    methods: {
-      removeProduct(index) {
-        this.products.splice(index, 1);
-      },
-    },
-  };
-  </script>
-  
+        <div class="minicart--item--details">
+          <p class="title">{{ product.product_name }}</p>
+          <p class="vendedor"><i class="fa-solid fa-bag-shopping"></i> Descripción: {{ product.user_id }}</p>
+          <p class="cantidad"><i class="fa-solid fa-hashtag"></i> Cantidad: {{ product.quantity }}</p>
+          <p class="price"><i class="fa-solid fa-colon-sign"></i> Precio: {{ product.product_price }}</p>
+          <p class="remove">
+            <a href="#" @click.prevent="removeProduct(index)">
+              <i class="fa-solid fa-trash"></i> Eliminar del carrito
+            </a>
+          </p>
+        </div>
+      </div>
+    </li>
+  </ul>
+</template>
+
+<script>
+import { mapGetters, mapMutations } from 'vuex';
+
+export default {
+  computed: {
+    ...mapGetters(['cartItems']),
+  },
+  methods: {
+    ...mapMutations(['removeProduct']), // Usamos la mutación directamente
+  },
+};
+</script>
+
 <style scoped>
 
 ul {
@@ -47,8 +45,20 @@ ul {
   float: left;
 }
 
-.minicart--item > * {
+.minicart--item>* {
   margin-bottom: 5px;
+}
+.minicart--item--details--container{
+  display: flex;
+  gap: 0;
+}
+
+.minicart--item--details--container > .placeholder {
+  flex: 2;
+}
+
+.minicart--item--details--container > .minicart--item--details {
+  flex: 3;
 }
 
 .placeholder {
@@ -59,26 +69,32 @@ ul {
   background: #D8D8D8;
 }
 
+.minicart--item--details {
+  height: 100px;
+  display: flex;
+  flex-direction: column;;
+  justify-content: space-between;
+}
+
+.title, .material, .price, .vendedor, .cantidad {
+  font-size: .8em;
+  margin: 0;
+}
+
 .title {
-  font-size: 1.1em;
+  font-size: 0.9em;
   font-weight: 600;
   margin-bottom: 0;
   margin-top: 0;
 }
 
-.material, .price {
-  font-size: .8em;
+.remove, a {
   margin-bottom: 0;
   margin-top: 0;
+  font-size: .85em;
+  font-weight: 500;
+  text-decoration: none;
+  color: rgb(180, 33, 33);
 }
-
-.remove {
-  margin-bottom: 0;
-  margin-top: 0;
-  font-size: .6em;
-}
-
-
-
 
 </style>

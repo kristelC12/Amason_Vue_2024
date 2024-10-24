@@ -1,40 +1,50 @@
 <template>
   <div class="minicart">
     <div class="minicart--item-container">
-      ¡Tienes <span class="minicart--item-count" style="font-weight: 600">1 item(s)</span> en tu carrito!
+      <span class="cart--vacio" v-if="cartItems.length === 0">¡Tu carrito está vacío!</span>
+      <span v-else>¡Tienes <span class="minicart--item-count" style="font-weight: 600">{{ cartItems.length }} item(s)</span> en tu carrito!</span>
     </div>
-    <hr>
-    <popUpCartItem/>
-    <hr>
-    <div class="minicart--subtotal">
+    <hr v-if="cartItems.length > 0">
+    <div class="cartItem--container" v-if="cartItems.length > 0">
+      <popUpCartItem />
+    </div>
+    
+    <hr v-if="cartItems.length > 0">
+    <div class="minicart--subtotal" v-if="cartItems.length > 0">
       <p class="minicart--subtotal-title">Subtotal</p>
-      <p class="minicart--subtotal-amount">$90.00</p>
+      <p class="minicart--subtotal-amount">{{ formattedTotalAmount }}</p>
     </div>
-    
-    <div>
-      <input type="button" value="Ver detalles del carrito">
+
+    <div v-if="cartItems.length > 0">
+      <input type="button" value="Ver detalles del carrito" @click="goToCart">
     </div>
-    
   </div>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex';
 import popUpCartItem from './PopUpCartItem.vue';
+
 export default {
   components: {
     popUpCartItem,
-    
   },
-
-    
-}
-
-
+  computed: {
+    ...mapGetters(['cartItems', 'formattedTotalAmount']),
+  },
+  methods: {
+    ...mapActions(['fetchCartItems']),
+    goToCart() {
+      this.$router.push('/carrito');
+    },
+  },
+  mounted() {
+    this.fetchCartItems();
+  },
+};
 </script>
 
 <style scoped>
-
-
 .minicart {
   font-family: sans-serif;
   width: 290px;
@@ -46,9 +56,8 @@ export default {
   color: black;
   text-align: left;
   max-height: 600px;
+  box-sizing: content-box;
 }
-
-
 
 .minicart input {
   margin-top: 20px;
@@ -67,11 +76,24 @@ export default {
   background: #4babe2;
 }
 
+.cartItem--container {
+  max-height: 330px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .minicart--item-container {
-  margin-bottom: 10px;
+  display: flex;
+  text-align: center;
+  margin: 0;
   font-size: .8em;
+}
+
+.cart--vacio{
   
- 
+  width:100%;
+  font-weight: 600;
+
 }
 
 .minicart hr {
@@ -80,22 +102,24 @@ export default {
 }
 
 .minicart--subtotal {
-  margin: 20px 0;
+  margin: 0;
 }
 
 .minicart--subtotal-title {
   float: left;
+  margin: 0;
 }
 
 .minicart--subtotal-amount {
   float: right;
   font-weight: 600;
   font-size: 1.2em;
+  margin: 0;
 }
 
 @media (max-height: 660px) {
   .minicart {
-    max-height: 200px;
+    max-height: 400px;
     overflow-y: scroll;
     overflow-x: hidden;
   }
