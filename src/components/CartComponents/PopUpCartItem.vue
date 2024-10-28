@@ -12,10 +12,12 @@
         <div class="minicart--item--details">
           <p class="title">{{ item.product_name }}</p>
           <p class="vendedor"><i class="fa-solid fa-bag-shopping"></i> Descripción: {{ item.user_id }}</p>
-          <p class="cantidad">
-            <i class="fa-solid fa-hashtag"></i> Cantidad: {{ item.quantity }}
-            <input type="number" class="input-quantity" :value="item.quantity"
-            @change="updateQuantity(item.product_id, $event.target.value)" min = "1">
+          <p class="quantity"><i class="fa-solid fa-hashtag"></i> Cantidad:
+            <span>
+              <button class="quantity-btn" @click="decreaseQuantity(item)">-</button>
+              {{ item.quantity }}
+              <button class="quantity-btn" @click="increaseQuantity(item)">+</button>
+            </span>
           </p>
           <p class="price"><i class="fa-solid fa-colon-sign"></i> Precio: {{ item.product_price }}</p>
         </div>
@@ -42,12 +44,13 @@ export default {
         this.removeProductFromCart(product_id);
       }
     },
-    updateQuantity(productId, quantity, action) {
-      console.log(productId, quantity);
-      const parsedQuantity = parseInt(quantity, 10);
-      if (parsedQuantity > 0) {
-        this.updateProductQuantity({ productId, quantity, action });
-      }
+    increaseQuantity(product) {
+    this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity + 1, action: 'add' });
+  },
+  decreaseQuantity(product) {
+    if (product.quantity > 1) {
+      this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity - 1, action: 'remove' });
+    }
     },
   },
 };
@@ -107,19 +110,33 @@ img {
 .material,
 .price,
 .vendedor,
-.cantidad {
+.quantity {
   font-size: .8em;
   margin: 0;
 }
 
-.cantidad .input-quantity {
-  width: 40px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 1em;
-  padding: 2px;
-  margin-left: 5px;
-  text-align: center;
+.quantity {
+  display: block;
+  align-items: center;
+}
+
+.quantity span {
+  width: 60px;
+  align-items: center;
+  gap: 5px;
+  justify-content: center;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #e2e2e2;
+}
+
+.quantity button.quantity-btn {
+  font-size: 1.2em;
+  font-weight: 500;
+  background: none;
+  border: none;
+  color: #808080;
+  cursor: pointer;
 }
 
 .title {

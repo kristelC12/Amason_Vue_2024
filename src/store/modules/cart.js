@@ -69,12 +69,12 @@ const cart = {
       try {
         const index = state.cart.findIndex(product => product.product_id === productId);
         if (index === -1) {
-          console.log(Error('Producto no encontrado en el carrito'));
+          throw new Error('Producto no encontrado en el carrito');
         }
         const response = await api.post('/cart/update-units', {
           idproducttoupdate: productId,
           quantity: 1,
-          action,
+          action: action,
         }, {
           headers: {
             'Content-Type': 'application/json',

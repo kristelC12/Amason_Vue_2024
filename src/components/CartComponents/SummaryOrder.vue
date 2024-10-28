@@ -38,14 +38,6 @@ export default {
   computed: {
     ...mapGetters('cart', ['cartItems', 'formattedTotalAmount']),
   },
-  mounted() {
-    this.fetchCartItems();
-  },
-  methods: {
-    fetchCartItems() {
-      this.$store.dispatch('fetchCartItems');
-    }
-  }
 };
 </script>
 

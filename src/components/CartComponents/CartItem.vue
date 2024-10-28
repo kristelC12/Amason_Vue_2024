@@ -17,9 +17,9 @@
       </div>
       <div class="group">
         <div class="quantity">
-          <button class="quantity-btn" @click="decreaseQuantity(index)">-</button>
+          <button class="quantity-btn" @click="decreaseQuantity(product)">-</button>
           <p class="quantity-display">{{ product.quantity }}</p>
-          <button class="quantity-btn" @click="increaseQuantity(index)">+</button>
+          <button class="quantity-btn" @click="increaseQuantity(product)">+</button>
         </div>
         <button class="btn-delete" @click.prevent="removeProduct(product.product_id)">
           <i class="fa-solid fa-trash-can fa-2xl" style="color: #c8240d"></i>
@@ -41,6 +41,7 @@ export default {
   props: {
     product: Object,
     isSelected: Boolean
+ 
   },
   methods: {
     ...mapActions('cart', ['removeProductFromCart', 'updateProductQuantity']),
@@ -53,15 +54,13 @@ export default {
     updateSelection() {
       this.$emit('update-selection', !this.isSelected);
     },
-    increaseQuantity(index) {
-      const product = this.cartItems[index];
-      this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity + 1, action: 'add' });
-    },
-    decreaseQuantity(index) {
-      const product = this.cartItems[index];
-      if (product.quantity > 1) {
-        this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity - 1, action: 'remove' });
-      }
+    increaseQuantity(product) {
+    this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity + 1, action: 'add' });
+  },
+  decreaseQuantity(product) {
+    if (product.quantity > 1) {
+      this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity - 1, action: 'remove' });
+    }
     },
     
   },
