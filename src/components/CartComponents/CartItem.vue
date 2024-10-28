@@ -50,11 +50,15 @@ export default {
     updateSelection() {
       this.$emit('update-selection', !this.isSelected);
     },
-    decreaseQuantity() {
-      this.updateQuantity(this.product.product_id, this.product.quantity - 1);
+    increaseQuantity(index) {
+      const product = this.cartItems[index];
+      this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity + 1, action: 'add' });
     },
-    increaseQuantity() {
-      this.updateQuantity(this.product.product_id, this.product.quantity + 1);
+    decreaseQuantity(index) {
+      const product = this.cartItems[index];
+      if (product.quantity > 1) {
+        this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity - 1, action: 'remove' });
+      }
     },
     updateQuantity(productId, quantity) {
       const parsedQuantity = parseInt(quantity, 10);

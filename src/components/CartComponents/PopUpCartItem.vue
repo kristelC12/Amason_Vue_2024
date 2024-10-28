@@ -38,6 +38,12 @@ export default {
     removeProduct(product_id) {
       this.removeProductFromCart(product_id);
     },
+    updateQuantity(productId, quantity) {
+      const parsedQuantity = parseInt(quantity, 10);
+      if (parsedQuantity > 0) {
+        this.updateProductQuantity({ productId, quantity: parsedQuantity });
+      }
+    },
   },
 };
 </script>
