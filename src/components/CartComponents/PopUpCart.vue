@@ -6,12 +6,14 @@
     </div>
     <hr v-if="cartItems.length > 0">
     
-    <popUpCartItem
-      v-for="(product, index) in cartItems"
-      :key="product.product_id"
-      :item="product"
-      :index="index"
-    />
+    <transition-group name="fade" tag="list">
+      <popUpCartItem
+        v-for="(product, index) in cartItems"
+        :key="product.product_id"
+        :item="product"
+        :index="index"
+      />
+    </transition-group>
     
     <hr v-if="cartItems.length > 0">
     <div class="minicart--subtotal" v-if="cartItems.length > 0">
@@ -27,11 +29,11 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import PopUpCartItem from './PopUpCartItem.vue'; // Verifica que el nombre del archivo sea correcto
+import PopUpCartItem from './PopUpCartItem.vue';
 
 export default {
   components: {
-    PopUpCartItem, // Asegúrate de que el nombre coincida
+    PopUpCartItem,
   },
   computed: {
     ...mapGetters('cart', ['cartItems', 'formattedTotalAmount']),
@@ -82,11 +84,20 @@ export default {
   overflow-x: hidden;
 }
 
+
 .minicart--item-container {
   display: flex;
   text-align: center;
   margin: 0;
   font-size: .8em;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active en Vue <2.1.8 */ {
+  opacity: 0;
+  transform: scale(0.95);
 }
 
 .cart--vacio {

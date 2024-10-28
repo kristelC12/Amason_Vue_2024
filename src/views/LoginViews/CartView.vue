@@ -16,6 +16,7 @@
           </button>
         </div>
       </div>
+      <transition-group name="fade" tag="list">
       <CarritoItem
         v-for="(item, index) in cartItems"
         :key="item.product_id"
@@ -24,6 +25,7 @@
         @update-selection="updateSelection(index, $event)"
         ref="cartItem"
       />
+          </transition-group>
     </div>
     <div class="order">
       <SummaryOrder />
@@ -170,6 +172,19 @@ hr {
 .delete-btn:hover {
   background-color: #b71c1c;
 }
+
+::view-transition-group{
+display: block;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active en Vue <2.1.8 */ {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
 .order-bottom {
   display: none;
 }

@@ -40,9 +40,9 @@ export default {
   methods: {
     ...mapActions('cart', ['removeProductFromCart', 'updateProductQuantity']),
     removeProduct(product_id) {
-      if(confirm('¿Estás seguro de que deseas eliminar este producto?')){
+      
         this.removeProductFromCart(product_id);
-      }
+      
     },
     increaseQuantity(product) {
     this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity + 1, action: 'add' });

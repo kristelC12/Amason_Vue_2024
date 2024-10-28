@@ -26,8 +26,7 @@ export default {
   },
   
   async created() {
-    const response = await this.fetchCartItems();
-    console.log('response', response);
+    await this.fetchCartItems();
   },
 };
 

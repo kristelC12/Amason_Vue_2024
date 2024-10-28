@@ -8,7 +8,6 @@ export async function loginUser(userData) {
     const token = response.data.token
     const pivotId = response.data.roles[0].pivot.user_id
     const roles = response.data.roles
-    console.log(roles)
     const roleNames = roles.map((role) => role.name)
 
     // Guardar token y pivotId en localStorage
