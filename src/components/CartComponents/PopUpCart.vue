@@ -5,9 +5,13 @@
       <span v-else>¡Tienes <span class="minicart--item-count" style="font-weight: 600">{{ cartItems.length }} item(s)</span> en tu carrito!</span>
     </div>
     <hr v-if="cartItems.length > 0">
-    <div class="cartItem--container" v-if="cartItems.length > 0">
-      <popUpCartItem/>
-    </div>
+    
+    <popUpCartItem
+      v-for="(product, index) in cartItems"
+      :key="product.product_id"
+      :item="product"
+      :index="index"
+    />
     
     <hr v-if="cartItems.length > 0">
     <div class="minicart--subtotal" v-if="cartItems.length > 0">
@@ -22,29 +26,20 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import popUpCartItem from './PopUpCartItem.vue';
+import { mapGetters } from 'vuex';
+import PopUpCartItem from './PopUpCartItem.vue'; // Verifica que el nombre del archivo sea correcto
 
 export default {
   components: {
-    popUpCartItem,
+    PopUpCartItem, // Asegúrate de que el nombre coincida
   },
   computed: {
-
-    ...mapGetters(['cartItems', 'formattedTotalAmount']),
-  
+    ...mapGetters('cart', ['cartItems', 'formattedTotalAmount']),
   },
   methods: {
-
-    ...mapActions(['fetchCartItems']),
-
     goToCart() {
       this.$router.push('/carrito');
     },
-
-  },
-  mounted() {
-    this.fetchCartItems();
   },
 };
 </script>

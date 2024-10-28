@@ -1,25 +1,21 @@
 <template>
   <ul>
-    <li class="minicart--item" v-for="(product, index) in cartItems" :key="index">
+    <li class="minicart--item">
       <div class="minicart--item--details--container">
         <div class="placeholder">
           <img
-            src="https://www.steren.cr/media/catalog/product/cache/b69086f136192bea7a4d681a8eaf533d/image/21867108a/audifonos-bluetooth-con-cancelacion-de-ruido-negros.jpg"
-            alt="">
-
-          <a href="#" class="remove" @click.prevent="removeProduct(product.product_id)">
+          src="https://www.steren.cr/media/catalog/product/cache/b69086f136192bea7a4d681a8eaf533d/image/21867108a/audifonos-bluetooth-con-cancelacion-de-ruido-negros.jpg">
+          <a href="#" class="remove" @click.prevent="removeProduct(item.product_id)">
             <i class="fa-solid fa-trash"></i>
           </a>
         </div>
         <div class="minicart--item--details">
-          <p class="title">{{ product.product_name }}</p>
-          <p class="vendedor"><i class="fa-solid fa-bag-shopping"></i> Descripción: {{ product.user_id }}</p>
+          <p class="title">{{ item.product_name }}</p>
+          <p class="vendedor"><i class="fa-solid fa-bag-shopping"></i> Descripción: {{ item.user_id }}</p>
           <p class="cantidad">
-            <i class="fa-solid fa-hashtag"></i> Cantidad:
-            <input type="number" class="input-quantity" :value="product.quantity"
-              @blur="updateQuantity(product.product_id, $event.target.value)" min="1">
+            <i class="fa-solid fa-hashtag"></i> Cantidad: {{ item.quantity }}
           </p>
-          <p class="price"><i class="fa-solid fa-colon-sign"></i> Precio: {{ product.product_price }}</p>
+          <p class="price"><i class="fa-solid fa-colon-sign"></i> Precio: {{ item.product_price }}</p>
         </div>
       </div>
     </li>
@@ -27,22 +23,20 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapActions } from 'vuex';
+
 
 export default {
-  computed: {
-    ...mapGetters(['cartItems']),
+  props: {
+    item: { // Cambiado a 'item'
+      type: Object,
+      required: true,
+    },
   },
   methods: {
-    ...mapActions(['removeProductFromCart', 'updateProductQuantity']),
-    removeProduct(productId) {
-      this.removeProductFromCart(productId);
-    },
-    updateQuantity(productId, quantity) {
-      const parsedQuantity = parseInt(quantity, 10);
-      if (parsedQuantity > 0) {
-        this.updateProductQuantity({ productId, quantity: parsedQuantity });
-      }
+    ...mapActions('cart', ['removeProductFromCart']),
+    removeProduct(product_id) {
+      this.removeProductFromCart(product_id);
     },
   },
 };

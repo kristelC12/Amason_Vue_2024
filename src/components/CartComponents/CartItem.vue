@@ -1,6 +1,6 @@
 <template>
-  <div class="details-card" v-for="(product, index) in cartItems" :key="index" >
-    <CarritoCheckbox :checked="selectedAll" @update:checked="updateSelection(index, $event)" />
+  <div class="details-card">
+    <CarritoCheckbox :checked="isSelected" @update:checked="updateSelection" />
     <div class="image-card">
       <img
         src="https://www.steren.cr/media/catalog/product/cache/b69086f136192bea7a4d681a8eaf533d/image/21867108a/audifonos-bluetooth-con-cancelacion-de-ruido-negros.jpg">
@@ -17,9 +17,9 @@
       </div>
       <div class="group">
         <div class="quantity">
-          <button class="quantity-btn" @click="decreaseQuantity(index)">-</button>
+          <button class="quantity-btn" @click="decreaseQuantity">-</button>
           <p class="quantity-display">{{ product.quantity }}</p>
-          <button class="quantity-btn" @click="increaseQuantity(index)">+</button>
+          <button class="quantity-btn" @click="increaseQuantity">+</button>
         </div>
         <button class="btn-delete" @click.prevent="removeProduct(product.product_id)">
           <i class="fa-solid fa-trash-can fa-2xl" style="color: #c8240d"></i>
@@ -31,26 +31,38 @@
 
 <script>
 import CarritoCheckbox from './CheckboxCart.vue'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions } from 'vuex'
+
 
 export default {
   components: {
     CarritoCheckbox
   },
-  computed: {
-    ...mapGetters(['cartItems']),
+  props: {
+    product: Object,
+    isSelected: Boolean
   },
   methods: {
-    ...mapActions(['removeProductFromCart', 'updateProductQuantity']),
-    removeProduct(productId) {
-      this.removeProductFromCart(productId);
+    ...mapActions('cart', ['removeProductFromCart', 'updateProductQuantity']),
+    removeProduct(product_id) {
+      this.removeProductFromCart(product_id);
+    },
+    updateSelection() {
+      this.$emit('update-selection', !this.isSelected);
+    },
+    decreaseQuantity() {
+      this.updateQuantity(this.product.product_id, this.product.quantity - 1);
+    },
+    increaseQuantity() {
+      this.updateQuantity(this.product.product_id, this.product.quantity + 1);
     },
     updateQuantity(productId, quantity) {
       const parsedQuantity = parseInt(quantity, 10);
-      if (parsedQuantity > 0) {
+      if (parsedQuantity >= 0) {
         this.updateProductQuantity({ productId, quantity: parsedQuantity });
       }
     },
+    
   },
 }
 </script>

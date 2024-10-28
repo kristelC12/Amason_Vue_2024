@@ -16,7 +16,14 @@
           </button>
         </div>
       </div>
-      <CarritoItem/>
+      <CarritoItem
+        v-for="(item, index) in cartItems"
+        :key="item.product_id"
+        :product="item"
+        :is-selected="selectedItems[index] || false"
+        @update-selection="updateSelection(index, $event)"
+        ref="cartItem"
+      />
     </div>
     <div class="order">
       <SummaryOrder />
@@ -27,37 +34,44 @@
 <script>
 import CarritoItem from '../../components/CartComponents/CartItem.vue'
 import SummaryOrder from '../../components/CartComponents/SummaryOrder.vue'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
     CarritoItem,
     SummaryOrder
   },
+  data() {
+    return {
+      selectedAll: false,
+      selectedItems: []
+    }
+  },
   computed: {
-
-...mapGetters(['cartItems', 'formattedTotalAmount']),
-
+    ...mapGetters('cart', ['cartItems', 'formattedTotalAmount']),
+    selectedCount() {
+      return this.selectedItems.filter(item => item).length;
+  }
 },
-methods: {
-
-...mapActions(['fetchCartItems']),
-
-toggleSelectAll() {
-      this.selectedAll = !this.selectedAll
-      this.selectedCount = this.selectedAll ? this.cartItems.length : 0
-      this.$emit('update-selection', this.selectedCount)
-      this.cartItems.forEach((item, index) => {
-        this.$refs[`cartItem${index}`].setSelected(this.selectedAll)
-      })
+  methods: {
+  
+    toggleSelectAll() {
+      this.selectedAll = !this.selectedAll;
+      this.selectedItems = this.cartItems.map(() => this.selectedAll);
     },
-
-},
-mounted() {
-this.fetchCartItems();
-},
-};
-
+    updateSelection(index, isSelected) {
+      this.$set(this.selectedItems, index, isSelected);
+    },
+    deleteSelectedItems() {
+      this.cartItems.forEach((item, index) => {
+        if (this.selectedItems[index]) {
+          this.removeProduct(item.product_id);
+        }
+      });
+      this.selectedItems = [];
+    },
+  }
+}
 </script>
 
 <style scoped>

@@ -1,7 +1,7 @@
-import Vuex from 'vuex';
-import api from '../services/api';
+import api from '../../../services/api';
 
-export default new Vuex.Store({
+const cart = {
+  namespaced: true,
   state: {
     cart: [],
     totalAmount: 0,
@@ -73,4 +73,6 @@ export default new Vuex.Store({
       }).format(state.totalAmount);
     },
   },
-});
+};
+
+export default cart;

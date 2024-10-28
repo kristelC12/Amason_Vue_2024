@@ -78,6 +78,7 @@
 import PopUpCart from '../CartComponents/PopUpCart.vue'
 import { logoutUser } from '../../../api/auth'
 
+
 export default {
   components: {
     PopUpCart
@@ -86,7 +87,9 @@ export default {
     logout() {
       logoutUser() // Llamada a la función que elimina el token y redirige
       this.$router.push('/login') // Redirige al login después del logout
-    }
+    },
+
+
   }
 }
 </script>
