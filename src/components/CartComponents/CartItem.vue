@@ -17,9 +17,9 @@
       </div>
       <div class="group">
         <div class="quantity">
-          <button class="quantity-btn" @click="decreaseQuantity">-</button>
+          <button class="quantity-btn" @click="decreaseQuantity(index)">-</button>
           <p class="quantity-display">{{ product.quantity }}</p>
-          <button class="quantity-btn" @click="increaseQuantity">+</button>
+          <button class="quantity-btn" @click="increaseQuantity(index)">+</button>
         </div>
         <button class="btn-delete" @click.prevent="removeProduct(product.product_id)">
           <i class="fa-solid fa-trash-can fa-2xl" style="color: #c8240d"></i>
@@ -45,7 +45,10 @@ export default {
   methods: {
     ...mapActions('cart', ['removeProductFromCart', 'updateProductQuantity']),
     removeProduct(product_id) {
-      this.removeProductFromCart(product_id);
+      if(confirm('¿Está seguro de eliminar este producto?')){
+        this.removeProductFromCart(product_id);
+      }
+      
     },
     updateSelection() {
       this.$emit('update-selection', !this.isSelected);
@@ -58,12 +61,6 @@ export default {
       const product = this.cartItems[index];
       if (product.quantity > 1) {
         this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity - 1, action: 'remove' });
-      }
-    },
-    updateQuantity(productId, quantity) {
-      const parsedQuantity = parseInt(quantity, 10);
-      if (parsedQuantity >= 0) {
-        this.updateProductQuantity({ productId, quantity: parsedQuantity });
       }
     },
     

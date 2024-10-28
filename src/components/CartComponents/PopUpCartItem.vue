@@ -42,10 +42,11 @@ export default {
         this.removeProductFromCart(product_id);
       }
     },
-    updateQuantity(productId, quantity) {
+    updateQuantity(productId, quantity, action) {
+      console.log(productId, quantity);
       const parsedQuantity = parseInt(quantity, 10);
       if (parsedQuantity > 0) {
-        this.updateProductQuantity({ productId, quantity: parsedQuantity });
+        this.updateProductQuantity({ productId, quantity, action });
       }
     },
   },
