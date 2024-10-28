@@ -14,6 +14,8 @@
           <p class="vendedor"><i class="fa-solid fa-bag-shopping"></i> Descripción: {{ item.user_id }}</p>
           <p class="cantidad">
             <i class="fa-solid fa-hashtag"></i> Cantidad: {{ item.quantity }}
+            <input type="number" class="input-quantity" :value="item.quantity"
+            @change="updateQuantity(item.product_id, $event.target.value)" min = "1">
           </p>
           <p class="price"><i class="fa-solid fa-colon-sign"></i> Precio: {{ item.product_price }}</p>
         </div>
@@ -28,15 +30,17 @@ import { mapActions } from 'vuex';
 
 export default {
   props: {
-    item: { // Cambiado a 'item'
+    item: {
       type: Object,
       required: true,
     },
   },
   methods: {
-    ...mapActions('cart', ['removeProductFromCart']),
+    ...mapActions('cart', ['removeProductFromCart', 'updateProductQuantity']),
     removeProduct(product_id) {
-      this.removeProductFromCart(product_id);
+      if(confirm('¿Estás seguro de que deseas eliminar este producto?')){
+        this.removeProductFromCart(product_id);
+      }
     },
     updateQuantity(productId, quantity) {
       const parsedQuantity = parseInt(quantity, 10);
