@@ -3,7 +3,7 @@
     <img :src="product.product_image" :alt="product.product_name" />
     <h3>{{ product.product_name }}</h3>
     <div class="price-addCart">
-      <p class="price">${{ product.product_price.toFixed(2) }}</p>
+      <p class="price">₡ {{ product.product_price.toFixed(2) }}</p>
       <i
         v-if="isAdding"
         class="fa-solid fa-spinner fa-spin-pulse fa-2x"

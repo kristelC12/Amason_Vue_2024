@@ -71,6 +71,12 @@
           <span>Carrito</span>
         </router-link>
       </div>
+
+      <div class="containerOption">
+      <a href="#" @click.prevent="logout">
+        <i class="logout-icon fa-solid fa-power-off fa-xl" style="color: #ff0000;"></i>
+      </a>
+    </div>
     </div>
   </nav>
 </template>
@@ -183,7 +189,7 @@ nav {
   transform: translateY(-10px);
 }
 
-.cart-container:hover .cart-toggle {
+.cart-container .cart-toggle {
   display: block;
   opacity: 1;
   transform: translateY(0);
@@ -229,6 +235,10 @@ ul li a:hover {
 
 .bottom-nav {
   display: none;
+}
+
+.logout-icon {
+  font-size: 2em;
 }
 
 @media (max-width: 1030px) {
