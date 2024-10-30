@@ -35,10 +35,13 @@
 </template>
 
 <script>
-
+import NavBar from '@/components/LayoutComponents/NavBar.vue';
+import FooterLayout from '@/components/LayoutComponents/FooterLayout.vue';
 import apiClient from '../../../services/api'; // Importar el apiClient
 
 export default {
+  components: { NavBar, FooterLayout },
+  props: ['id'],
   data() {
     return {
       ticket: {
@@ -98,13 +101,27 @@ export default {
         container.scrollTop = container.scrollHeight;
       });
     },
-    submitTicket() {
-      console.log("Ticket actualizado:", this.ticket);
+    async submitTicket() {
+      try {
+    // Lógica para actualizar el ticket (si hay alguna)
+    console.log("Ticket actualizado:", this.ticket);
+    
+    // Verifica el rol del usuario
+    const userRole = localStorage.getItem('userRole'); // Asegúrate de que esto se ajuste a tu implementación
+    if (userRole === 'admin') {
+      // Redirigir a la vista de tickets para administradores
+      this.$router.push('/admin-tickets'); // Cambia '/admin-tickets' por la ruta adecuada para admin
+    } else {
+      // Redirigir a la vista de tickets para usuarios
+      this.$router.push('/tickets'); // Cambia '/tickets' por la ruta adecuada para usuarios
     }
+  } catch (error) {
+    console.error('Error actualizando el ticket:', error);
+  }
+  }
   },
 };
 </script>
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');

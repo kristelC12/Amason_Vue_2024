@@ -65,8 +65,12 @@
 </template>
 
 <script>
+import apiClient from '../../../services/api'
+import NavBar from '@/components/LayoutComponents/NavBar.vue';
+import FooterLayout from '@/components/LayoutComponents/FooterLayout.vue';
 
 export default {
+  components: { NavBar, FooterLayout },
   data() {
     return {
       ticket: {
@@ -89,13 +93,45 @@ export default {
         input.nextElementSibling.textContent = input.files[0].name;
       }
     },
-    submitTicket() {
-      console.log("Ticket creado:", this.ticket);
+    async submitTicket() {
+      try {
+        const formData = new FormData();
+
+        // Asignar los campos del formulario al FormData
+        formData.append('order_package', this.ticket.orderPackage); // Corregir el nombre
+        formData.append('claim_type', this.ticket.category); // Corregir el nombre
+        formData.append('subject', this.ticket.subject);
+        formData.append('description', this.ticket.description);
+
+        // Asignar método de notificación
+        let notifyBy = '';
+        if (this.ticket.notifyEmail) notifyBy = 'email';
+        if (this.ticket.notifySMS) notifyBy = 'sms';
+        formData.append('notify_by', notifyBy);
+
+        // Asignar archivos al FormData
+        this.ticket.files.forEach((file, index) => {
+          if (file) {
+            formData.append('file', file); // El backend solo acepta un archivo
+          }
+        });
+
+        // Enviar la petición a la API usando apiClient
+        const response = await apiClient.post('/tickets/store', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+
+        console.log('Ticket creado:', response.data);
+      } catch (error) {
+        console.error('Error creando el ticket:', error.response);
+      }
     }
   }
 };
 </script>
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
 

@@ -11,6 +11,7 @@ import CreateTicketView from '../views/LoginViews/CreateTicketView.vue'
 import UpdateTicket from '@/components/TicketsComponents/UpdateTicket.vue'
 import sellerDashboard from '@/views/LoginViews/sellerDashboard.vue'
 import ProductList from '@/components/MenuComponents/ListOfProducts&ProductDetails/ProductList.vue';
+import AdminTicket from '@/components/TicketsComponents/AdminTicket.vue';
 
 
 const router = createRouter({
@@ -63,6 +64,11 @@ const router = createRouter({
             name: 'UpdateTicket',
             component: UpdateTicket,
             props: true
+          },
+          {
+            path: '/admin-tickets',
+            name: 'AdminTicket',
+            component: AdminTicket
           },
         ],
         

@@ -4,14 +4,14 @@
       <div class="minicart--item--details--container">
         <div class="placeholder">
           <img
-          :src= "item.product_image" :alt="item.product_name">
+          :src="item.product_image" :alt="item.product_name">
           <a href="#" class="remove" @click.prevent="removeProduct(item.product_id)">
             <i class="fa-solid fa-trash"></i>
           </a>
         </div>
         <div class="minicart--item--details">
           <p class="title">{{ item.product_name }}</p>
-          <p class="vendedor"><i class="fa-solid fa-bag-shopping"></i> Descripción: {{ item.product_description }}</p>
+          <p class="vendedor"><i class="fa-solid fa-bag-shopping"></i> Descripción: {{ truncatedDescription(item.product_description) }}</p>
           <p class="quantity"><i class="fa-solid fa-hashtag"></i> Cantidad:
             <span>
               <button class="quantity-btn" @click="decreaseQuantity(item)">-</button>
@@ -29,7 +29,6 @@
 <script>
 import { mapActions } from 'vuex';
 
-
 export default {
   props: {
     item: {
@@ -40,17 +39,19 @@ export default {
   methods: {
     ...mapActions('cart', ['removeProductFromCart', 'updateProductQuantity']),
     removeProduct(product_id) {
-      
-        this.removeProductFromCart(product_id);
-      
+      this.removeProductFromCart(product_id);
     },
     increaseQuantity(product) {
-    this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity + 1, action: 'add' });
-  },
-  decreaseQuantity(product) {
-    if (product.quantity > 1) {
-      this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity - 1, action: 'remove' });
-    }
+      this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity + 1, action: 'add' });
+    },
+    decreaseQuantity(product) {
+      if (product.quantity > 1) {
+        this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity - 1, action: 'remove' });
+      }
+    },
+    truncatedDescription(description) {
+      const maxLength = 15;
+      return description.length > maxLength ? description.substring(0, maxLength) + '...' : description;
     },
   },
 };

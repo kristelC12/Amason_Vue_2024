@@ -24,10 +24,10 @@
       </li>
       <!-- Opción "Ver Tickets" para admin -->
       <li v-if="isAdminOrUser">
-        <router-link to="/tickets">
+        <a href="#" @click.prevent="goToTickets">
           <div class="line-1">Devoluciones y</div>
           <div class="line-2">Servicio al cliente</div>
-        </router-link>
+        </a>
       </li>
       <li class="cart-container">
         <router-link to="/Carrito">
@@ -71,6 +71,12 @@
           <span>Carrito</span>
         </router-link>
       </div>
+
+      <div class="containerOption">
+      <a href="#" @click.prevent="logout">
+        <i class="logout-icon fa-solid fa-power-off fa-xl" style="color: #ff0000;"></i>
+      </a>
+    </div>
     </div>
   </nav>
 </template>
@@ -90,6 +96,14 @@ export default {
     }
   },
   methods: {
+    goToTickets() {
+      const role = localStorage.getItem('userRole');
+      if (role && role.includes('admin')) {
+        this.$router.push('/admin-tickets'); // Si es admin, redirigir a la vista de admin-tickets
+      } else {
+        this.$router.push('/tickets'); // Si es usuario normal, redirigir a la vista de tickets
+      }
+    },
     logout() {
       logoutUser() // Llamada a la función que elimina el token y redirige
       this.$router.push('/login') // Redirige al login después del logout
@@ -229,6 +243,10 @@ ul li a:hover {
 
 .bottom-nav {
   display: none;
+}
+
+.logout-icon {
+  font-size: 2em;
 }
 
 @media (max-width: 1030px) {
