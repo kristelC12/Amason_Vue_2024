@@ -2,7 +2,9 @@
   <div v-if="recomendaciones.length" class="recomendaciones">
     <h3>Productos Recomendados</h3>
     <div class="recomendaciones-container">
-      <button @click="prevProduct" class="nav-button"><i class="fa-solid fa-arrow-left"></i></button>
+      <button v-if="recomendaciones.length > 1" @click="prevProduct" class="nav-button">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
       <div class="productos">
         <div
           v-for="(producto, index) in displayedProducts"
@@ -13,11 +15,14 @@
             'producto--small': index !== 1,
           }"
         >
+          <img :src="producto.images[0].image_path" alt="Imagen del producto" class="product-image" />
           <h4>{{ producto.name }}</h4>
           <p>Precio: ${{ producto.price }}</p>
         </div>
       </div>
-      <button @click="nextProduct" class="nav-button"><i class="fa-solid fa-arrow-right"></i></button>
+      <button v-if="recomendaciones.length > 1" @click="nextProduct" class="nav-button">
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
     </div>
   </div>
 </template>
@@ -35,6 +40,12 @@ export default {
   computed: {
     displayedProducts() {
       const total = this.recomendaciones.length;
+
+      // Si hay menos de 3 productos, solo muestra uno
+      if (total < 3) {
+        return [this.recomendaciones[this.currentIndex]];
+      }
+
       return [
         this.recomendaciones[(this.currentIndex - 1 + total) % total],
         this.recomendaciones[this.currentIndex],
@@ -103,8 +114,7 @@ export default {
 }
 
 .producto {
-  width: 200px;
-  
+  width: 300px;
   text-align: center;
   margin: 0 20px;
   transition: transform 0.3s ease, opacity 0.3s ease;
@@ -112,14 +122,21 @@ export default {
 }
 
 .producto--current {
-  transform: scale(1.2);
+  transform: scale(1.1);
   opacity: 1;
   font-weight: bold;
 }
 
 .producto--small {
   transform: scale(0.8);
-  opacity: 0.5;
+  opacity: 0.8;
+}
+
+.product-image {
+  width: 100px; /* Ancho fijo para todas las imágenes */
+  height: 100px; /* Alto fijo para todas las imágenes */
+  object-fit: cover; /* Mantiene la proporción de la imagen y recorta si es necesario */
+  margin-bottom: 10px; /* Espacio entre la imagen y el texto */
 }
 
 .producto h4,
