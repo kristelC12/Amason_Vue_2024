@@ -41,7 +41,7 @@ export default {
           product_name: product.name,
           product_price: product.price,
           product_stock: product.stock,
-          protuct_image: product.image
+          product_image: product.image
         }));
       } catch (error) {
         console.error("Error al cargar productos por categoría:", error);

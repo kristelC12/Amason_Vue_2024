@@ -33,6 +33,7 @@ const cart = {
           product_name: product.product_name,
           product_price: product.product_price,
           product_description: product.product_description,
+          product_image: product.product_image,
           quantity: product.quantity,
           
         });
