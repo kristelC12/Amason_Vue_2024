@@ -55,17 +55,34 @@ export default {
       this.$emit('update-selection', !this.isSelected);
     },
 
-    increaseQuantity(product) {
-      this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity + 1, action: 'add' });
+    async increaseQuantity(product) {
+      // Obtener el stock disponible (puedes ajustar esto según cómo obtienes el stock)
+      const stockAvailable = product.stock; // Asegúrate de que el stock esté en el objeto product
+
+      // Solo incrementar si no excede el stock
+      if (product.quantity < stockAvailable) {
+        await this.updateProductQuantity({ 
+          productId: product.product_id, 
+          quantity: product.quantity + 1, 
+          action: 'add' 
+        });
+      } else {
+        alert('No hay suficiente stock disponible.');
+      }
     },
 
     decreaseQuantity(product) {
       if (product.quantity > 1) {
-        this.updateProductQuantity({ productId: product.product_id, quantity: product.quantity - 1, action: 'remove' });
+        this.updateProductQuantity({ 
+          productId: product.product_id, 
+          quantity: product.quantity - 1, 
+          action: 'remove' 
+        });
       }
     },
   },
 }
+
 </script>
 
 <style>
