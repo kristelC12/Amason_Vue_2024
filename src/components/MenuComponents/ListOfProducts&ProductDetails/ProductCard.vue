@@ -62,6 +62,12 @@ export default {
   transition: transform 0.5s;
   margin: 5px 8px;
 }
+img{
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
 
 .product-container:hover {
   transform: translateY(-5px);
