@@ -42,7 +42,7 @@ export default {
           product_name: product.name,
           product_price: product.price,
           product_stock: product.stock,
-          product_image: product.image_path,
+          product_image: product.image
         }));
 
         console.log(this.products.image_path);
