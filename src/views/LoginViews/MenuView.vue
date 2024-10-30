@@ -40,7 +40,6 @@ export default {
               items: dummyItems // Asignar los items a la categoría
             };
           });
-          console.log('Categories:', this.categories);
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
