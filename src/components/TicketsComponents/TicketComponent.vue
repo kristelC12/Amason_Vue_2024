@@ -1,111 +1,105 @@
 <template>
-    <div class="page-wrapper">
+  <div class="page-wrapper">
       <div class="background"></div> 
-
       <div class="main-container"> 
-        <div class="header">
-          <h2>Sistema de Tickets</h2>
-          <div class="header-actions">
-            <router-link to="/create-ticket">
-              <button class="btn btn-create">Crear Nuevo Ticket</button>
-            </router-link>
+          <div class="header">
+              <h2>Sistema de Tickets</h2>
+              <div class="header-actions">
+                  <router-link to="/create-ticket">
+                      <button class="btn btn-create">Crear Nuevo Ticket</button>
+                  </router-link>
+              </div>
           </div>
-        </div>
-    
-        <table class="ticket-table">
-          <thead>
-            <tr>
-              <th>Orden o Paquete</th>
-              <th>Tipo de Reclamo</th>
-              <th>Asunto</th>
-              <th>Descripción</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="ticket in tickets" :key="ticket.id">
-              <td data-label="Orden o Paquete">{{ ticket.order }}</td>
-              <td data-label="Tipo de Reclamo">{{ ticket.claimType }}</td>
-              <td data-label="Asunto">{{ ticket.subject }}</td>
-              <td data-label="Descripción">{{ ticket.description }}</td>
-              <td data-label="Estado">{{ ticket.status }}</td>
-              <td data-label="Acciones">
-                <router-link :to="`/details-ticket/${ticket.id}`">
-                  <button class="btn btn-details">Ver Detalles</button>
-                </router-link>
-                <router-link :to="`/update-ticket/${ticket.id}`">
-                  <button class="btn btn-update">Actualizar Ticket</button>
-                </router-link>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          <table class="ticket-table">
+              <thead>
+                  <tr>
+                      <th>Orden o Paquete</th>
+                      <th>Tipo de Reclamo</th>
+                      <th>Asunto</th>
+                      <th>Descripción</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr v-for="ticket in tickets" :key="ticket.id">
+                      <td data-label="Orden o Paquete">{{ ticket.order }}</td>
+                      <td data-label="Tipo de Reclamo">{{ ticket.claimType }}</td>
+                      <td data-label="Asunto">{{ ticket.subject }}</td>
+                      <td data-label="Descripción">{{ ticket.description }}</td>
+                      <td data-label="Estado">{{ ticket.status }}</td>
+                      <td data-label="Acciones">
+                          <button v-if="ticket.status !== 'closed'" class="btn btn-details" @click="closeTicket(ticket.id)">Cerrar Ticket</button>
+                          <router-link :to="`/update-ticket/${ticket.id}`">
+                              <button v-if="ticket.status !== 'closed'" class="btn btn-update">Actualizar Ticket</button>
+                          </router-link>
+                      </td>
+                  </tr>
+              </tbody>
+          </table>
       </div>
-    </div>
-
+  </div>
 </template>
 
 <script>
-
-import apiClient from '../../../services/api';  // Aquí estás importando tu cliente API
+import apiClient from '../../../services/api';  
 
 export default { 
-
   data() {
-    return {
-      tickets: []  // Inicialmente vacío, luego se llenará con los datos de la API
-    };
+      return {
+          tickets: []  
+      };
   },
-
   created() {
-    this.fetchUserTickets();
+      this.fetchUserTickets();
   },
-
   methods: {
-    async fetchUserTickets() {
-      try {
-    // Obtener el token desde el almacenamiento local
-    const token = localStorage.getItem('token');  // Asegúrate de usar la misma clave para el token
-
-    // Verificar si el token existe
-    if (!token) {
-      throw new Error('Token de autenticación no disponible');
-    }
-
-    // Enviar la petición a la API usando apiClient
-    const response = await apiClient.get('/user-tickets', {
-      headers: {
-        'Content-Type': 'application/json',  // No es necesario 'multipart/form-data' en un GET
-        Authorization: `Bearer ${localStorage.getItem('token')}`,  // Adjuntar el token en el encabezado
+      async closeTicket(ticketId) {
+          console.log("Cerrando ticket con ID:", ticketId); // Para depuración
+          try {
+              await apiClient.put(`/tickets/${ticketId}/close`, {}, {
+                  headers: {
+                      Authorization: `Bearer ${localStorage.getItem('token')}`
+                  }
+              });
+              this.fetchUserTickets(); // Actualiza la lista de tickets
+          } catch (error) {
+              console.error('Error al cerrar el ticket:', error);
+          }
       },
-    });
-
-    // Asignar los datos de los tickets a la variable
-    this.tickets = response.data.map(ticket => ({
-      id: ticket.id || ticket.ticket_id,
-      order: ticket.order_package,            // 'order_package' mapeado a 'order'
-      claimType: ticket.claim_type,           // 'claim_type' mapeado a 'claimType'
-      subject: ticket.subject,                // 'subject' se queda igual
-      description: ticket.description,        // 'description' se queda igual
-      status: ticket.status,                  // 'status' se queda igual
-      file: ticket.file,                      // 'file' se queda igual (si lo necesitas)
-      notifyBy: ticket.notify_by,             // 'notify_by' mapeado a 'notifyBy'
-      userId: ticket.user_id,                 // 'user_id' mapeado a 'userId'
-    }));
-  } catch (error) {
-        console.error("Error al obtener los tickets:", error);
+      async fetchUserTickets() {
+          try {
+              const token = localStorage.getItem('token');  
+              if (!token) {
+                  throw new Error('Token de autenticación no disponible');
+              }
+              const response = await apiClient.get('/user-tickets', {
+                  headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${localStorage.getItem('token')}`,  
+                  },
+              });
+              this.tickets = response.data.map(ticket => ({
+                  id: ticket.id || ticket.ticket_id,
+                  order: ticket.order_package,            
+                  claimType: ticket.claim_type,           
+                  subject: ticket.subject,                
+                  description: ticket.description,        
+                  status: ticket.status,                  
+                  file: ticket.file,                      
+                  notifyBy: ticket.notify_by,             
+                  userId: ticket.user_id,                 
+              }));
+          } catch (error) {
+              console.error("Error al obtener los tickets:", error);
+          }
       }
-    },
-    viewTicket(ticketId) {
-      console.log("Ver detalles del ticket:", ticketId);
-    },
-    updateTicket(ticketId) {
-      console.log("Actualizar ticket:", ticketId);
-    }
   }
 };
 </script>
+
+
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
