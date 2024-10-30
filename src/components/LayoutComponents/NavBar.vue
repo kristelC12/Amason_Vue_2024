@@ -189,7 +189,7 @@ nav {
   transform: translateY(-10px);
 }
 
-.cart-container .cart-toggle {
+.cart-container:hover .cart-toggle {
   display: block;
   opacity: 1;
   transform: translateY(0);
