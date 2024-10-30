@@ -1,7 +1,4 @@
 <template>
-  <div>
-    <NavBar /> 
-
     <div class="page-wrapper">
       <div class="background"></div> 
 
@@ -47,19 +44,13 @@
       </div>
     </div>
 
-    <footer>
-      <FooterLayout /> 
-    </footer>
-  </div>
 </template>
 
 <script>
-import NavBar from '@/components/LayoutComponents/NavBar.vue';
-import FooterLayout from '@/components/LayoutComponents/FooterLayout.vue';
+
 import apiClient from '../../../services/api';  // Aquí estás importando tu cliente API
 
-export default {
-  components: { NavBar, FooterLayout }, 
+export default { 
 
   data() {
     return {
@@ -115,7 +106,6 @@ export default {
   }
 };
 </script>
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');

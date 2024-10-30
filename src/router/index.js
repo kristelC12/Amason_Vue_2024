@@ -48,25 +48,26 @@ const router = createRouter({
             name: 'Carrito',
             component: CartView
           },
+          {
+            path: '/tickets',
+            name: 'Tickets',
+            component: TicketsView
+          },
+          {
+            path: '/create-ticket',
+            name: 'CreateTicket',
+            component: CreateTicketView
+          },
+          {
+            path: '/update-ticket/:id',
+            name: 'UpdateTicket',
+            component: UpdateTicket,
+            props: true
+          },
         ],
         
       },
-      {
-        path: '/tickets',
-        name: 'Tickets',
-        component: TicketsView
-      },
-      {
-        path: '/create-ticket',
-        name: 'CreateTicket',
-        component: CreateTicketView
-      },
-      {
-        path: '/update-ticket/:id',
-        name: 'UpdateTicket',
-        component: UpdateTicket,
-        props: true
-      },
+     
       {
         path: '/chat',
         name: 'Chat',

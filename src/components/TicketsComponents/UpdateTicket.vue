@@ -1,6 +1,4 @@
 <template>
-  <div>
-    <NavBar />
     <div class="background"></div>
     <div class="chat-container">
       <div class="chat-header">
@@ -33,20 +31,14 @@
         <button @click="submitTicket" class="btn-update">Actualizar</button>
       </div>
     </div>
-    <footer>
-      <FooterLayout />
-    </footer>
-  </div>
+    
 </template>
 
 <script>
-import NavBar from '@/components/LayoutComponents/NavBar.vue';
-import FooterLayout from '@/components/LayoutComponents/FooterLayout.vue';
+
 import apiClient from '../../../services/api'; // Importar el apiClient
 
 export default {
-  components: { NavBar, FooterLayout },
-  props: ['id'],
   data() {
     return {
       ticket: {
@@ -172,7 +164,7 @@ export default {
 }
 
 .user-message {
-  background-color:  #00aed5;
+  background-color: #00aed5;
   color: white;
   align-self: flex-end;
 }
@@ -196,7 +188,7 @@ export default {
 
 .btn-send {
   padding: 8px 16px;
-  background-color:  #00aed5;
+  background-color: #00aed5;
   color: white;
   border: none;
   border-radius: 5px;
@@ -227,7 +219,29 @@ export default {
 }
 
 .btn-update:hover {
-  background-color:  #00aed5;
+  background-color: #0079a1;
+}
+
+@media (max-width: 768px) {
+  .chat-container {
+    width: 90%;
+    height: 75vh;
+    margin: 10px;
+  }
+  .chat-header {
+    font-size: 1rem;
+  }
+  .btn-update {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .btn-update {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
 }
 
 @media (max-width: 480px) {
