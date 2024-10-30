@@ -10,7 +10,8 @@
 </template>
 
 <script>
-import CategoryCard from '@/components/MenuComponents/CategoryCard.vue'
+import CategoryCard from '@/components/MenuComponents/CategoryCard.vue';
+import api from '../../../services/api';
 
 export default {
   components: {
@@ -18,72 +19,42 @@ export default {
   },
   data() {
     return {
-      categories: [
-        {
-          title: 'Electronics',
-          items: [
-            { title: 'Phone', img: 'phone.jpg' },
-            { title: 'Laptop', img: 'laptop.jpg' },
-            { title: 'Headphones', img: 'headphones.jpg' },
-            { title: 'Camera', img: 'camera.jpg' }
-          ]
-        },
-        {
-          title: 'Clothing',
-          items: [
-            { title: 'T-shirt', img: 'tshirt.jpg' },
-            { title: 'Jeans', img: 'jeans.jpg' },
-            { title: 'Jacket', img: 'jacket.jpg' },
-            { title: 'Shoes', img: 'shoes.jpg' }
-          ]
-        },
-        {
-          title: 'Books',
-          items: [
-            { title: 'Fiction', img: 'fiction.jpg' },
-            { title: 'Science', img: 'science.jpg' },
-            { title: 'Biography', img: 'biography.jpg' },
-            { title: 'Fantasy', img: 'fantasy.jpg' }
-          ]
-        },
-        {
-          title: 'Toys & Games',
-          items: [
-            { title: 'Board Games', img: 'boardgames.jpg' },
-            { title: 'Action Figures', img: 'actionfigures.jpg' },
-            { title: 'Puzzles', img: 'puzzles.jpg' },
-            { title: 'Dolls', img: 'dolls.jpg' }
-          ]
-        },
-        {
-          title: 'Automotive',
-          items: [
-            { title: 'Car Tires', img: 'tires.jpg' },
-            { title: 'Engine Oil', img: 'engineoil.jpg' },
-            { title: 'Car Mats', img: 'carmats.jpg' },
-            { title: 'Seat Covers', img: 'seatcovers.jpg' }
-          ]
-        },
-        {
-          title: 'Beauty & Personal Care',
-          items: [
-            { title: 'Makeup', img: 'makeup.jpg' },
-            { title: 'Skincare', img: 'skincare.jpg' },
-            { title: 'Haircare', img: 'haircare.jpg' },
-            { title: 'Perfume', img: 'perfume.jpg' }
-          ]
-        }
-      ]
+      categories: []
     }
   },
   methods: {
+    async fetchCategories() {
+      try {
+        const response = await api.get('/categorias');
+        if (response.status === 200) {
+          this.categories = response.data.map(category => {
+            // Agregar 4 items quemados
+            const dummyItems = [
+              { title: 'Celular', name: 'item1', img: 'item1.jpg' },
+              { title: 'Laptop', name: 'item2', img: 'item2.jpg' },
+              { title: 'Audifonos', name: 'item3', img: 'item3.jpg' },
+              { title: 'Camaras', name: 'item4', img: 'item4.jpg' }
+            ];
+            return {
+              ...category,
+              items: dummyItems // Asignar los items a la categoría
+            };
+          });
+          console.log('Categories:', this.categories);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    },
     goToProductList(category) {
-      // Redirigir a la vista ProductList pasando la categoría seleccionada
-      this.$router.push({ 
-        name: 'ProductList', 
-        query: { category: category.title } 
+      this.$router.push({
+        name: 'ProductList',
+        query: { categoryId: category.id, title: category.name }
       });
     }
+  },
+  mounted() {
+    this.fetchCategories();
   }
 }
 </script>

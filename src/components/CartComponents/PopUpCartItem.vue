@@ -4,14 +4,14 @@
       <div class="minicart--item--details--container">
         <div class="placeholder">
           <img
-          src="https://www.steren.cr/media/catalog/product/cache/b69086f136192bea7a4d681a8eaf533d/image/21867108a/audifonos-bluetooth-con-cancelacion-de-ruido-negros.jpg">
+          :src= "item.product_image" :alt="item.product_name">
           <a href="#" class="remove" @click.prevent="removeProduct(item.product_id)">
             <i class="fa-solid fa-trash"></i>
           </a>
         </div>
         <div class="minicart--item--details">
           <p class="title">{{ item.product_name }}</p>
-          <p class="vendedor"><i class="fa-solid fa-bag-shopping"></i> Descripción: {{ item.user_id }}</p>
+          <p class="vendedor"><i class="fa-solid fa-bag-shopping"></i> Descripción: {{ item.product_description }}</p>
           <p class="quantity"><i class="fa-solid fa-hashtag"></i> Cantidad:
             <span>
               <button class="quantity-btn" @click="decreaseQuantity(item)">-</button>

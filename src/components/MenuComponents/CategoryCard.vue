@@ -1,6 +1,6 @@
 <template>
   <div class="category-card" @click="selectCategory">
-    <h2 class="item-headline">{{ category.title }}</h2>
+    <h2 class="item-headline">{{ category.name }}</h2>
     <div class="items">
       <div
         v-for="(item, index) in category.items"

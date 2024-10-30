@@ -3,7 +3,7 @@
     <CarritoCheckbox :checked="isSelected" @update:checked="updateSelection" />
     <div class="image-card">
       <img
-        src="https://www.steren.cr/media/catalog/product/cache/b69086f136192bea7a4d681a8eaf533d/image/21867108a/audifonos-bluetooth-con-cancelacion-de-ruido-negros.jpg">
+        :src="product.product_image" :alt="product.product_name">
     </div>
     <div class="description-item">
       <div class="bold">

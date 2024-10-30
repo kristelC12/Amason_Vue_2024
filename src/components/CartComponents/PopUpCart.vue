@@ -32,6 +32,7 @@
 import { mapGetters } from 'vuex';
 import popUpCartItem from './PopUpCartItem.vue';
 
+
 export default {
   components: {
     popUpCartItem,
@@ -44,6 +45,7 @@ export default {
   methods: {
 
     goToCart() {
+
       this.$router.push('/carrito');
     },
 

@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { loginUser } from '../../../api/auth';
+import { loginUser } from '../../../api/auth'
 
 export default {
   data() {
@@ -29,31 +29,30 @@ export default {
       password: '',
       errorMessage: null,
       error: null
-    };
+    }
   },
   methods: {
     async submitForm() {
-      this.errorMessage = null;
-      
+      this.errorMessage = null
+
       try {
+        await loginUser({ email: this.email, password: this.password })
+        const role = localStorage.getItem('roles')
 
-        await loginUser({ email: this.email, password: this.password });
-  
-        const role = localStorage.getItem('roles');
-        console.log(role);
-          if (role.includes('seller')) {
-          this.$router.push('/sellerDashboard');
+        // Almacenar el rol en el localStorage o en el estado de Vuex si es necesario
+        localStorage.setItem('userRole', role)
+
+        if (role.includes('seller')) {
+          this.$router.push('/sellerDashboard')
         } else {
-          this.$router.push('/Menu');
+          this.$router.push('/Menu')
         }
-
-
       } catch (error) {
-        this.errorMessage = error.message;
+        this.errorMessage = error.message
       }
     }
   }
-};
+}
 </script>
 
 <style scoped>
