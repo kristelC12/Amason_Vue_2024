@@ -12,6 +12,8 @@ import UpdateTicket from '@/components/TicketsComponents/UpdateTicket.vue'
 import sellerDashboard from '@/views/LoginViews/sellerDashboard.vue'
 import ProductList from '@/components/MenuComponents/ListOfProducts&ProductDetails/ProductList.vue';
 import AdminTicket from '@/components/TicketsComponents/AdminTicket.vue';
+import ReviewRatingsView from '@/views/LoginViews/ReviewRatingsView.vue';
+import WriteReviewView from '@/views/LoginViews/WriteReviewView.vue';
 
 
 const router = createRouter({
@@ -70,6 +72,16 @@ const router = createRouter({
             name: 'AdminTicket',
             component: AdminTicket
           },
+          { 
+            path: '/reviews-write', 
+            name: 'WriteReview', 
+            component: WriteReviewView, 
+          },
+          {
+            path: '/reviewsrating',
+            name: 'ReviewsRating',
+            component: ReviewRatingsView,
+          }
         ],
         
       },
