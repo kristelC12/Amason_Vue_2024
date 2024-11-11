@@ -11,7 +11,9 @@
       </div>
       <div class="gray-line"></div>
     </div>
-    <button class="btn">Check Out</button>
+    <router-link to="/CheckOut">
+      <button class="btn">Check Out</button>
+    </router-link>
     <div class="payments">
       <div class="method">
         <i class="fa-brands fa-cc-visa fa-2xl" style="color: #21246e"></i>

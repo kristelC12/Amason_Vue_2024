@@ -12,7 +12,7 @@ import UpdateTicket from '@/components/TicketsComponents/UpdateTicket.vue'
 import sellerDashboard from '@/views/LoginViews/sellerDashboard.vue'
 import ProductList from '@/components/MenuComponents/ListOfProducts&ProductDetails/ProductList.vue';
 import AdminTicket from '@/components/TicketsComponents/AdminTicket.vue';
-
+import CheckOut from '@/components/CartComponents/CheckOut.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -48,6 +48,11 @@ const router = createRouter({
             path: '/Carrito',
             name: 'Carrito',
             component: CartView
+          },
+          {
+            path: '/CheckOut',
+            name: 'CheckOut',
+            component: CheckOut
           },
           {
             path: '/tickets',
