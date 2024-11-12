@@ -497,5 +497,9 @@ input {
     border: 1px solid #ccc;
     font-size: 14px;
   }
+
+  .payment-icons {
+    right: 7px;
+  }
 }
 </style>
