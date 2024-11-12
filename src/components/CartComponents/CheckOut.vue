@@ -1,5 +1,40 @@
 <template>
   <div class="container">
+    <div class="card-information">
+      <!-- Información de envío -->
+      <div class="payment__shipping">
+        <div class="payment__title"><i class="icon icon-plane"></i> Shipping Information</div>
+
+        <!-- Mostrar la información de envío o el formulario de edición -->
+        <div class="details__user">
+          <div class="form-group">
+            <label for="shippingName">Name</label>
+            <input type="text" v-model="shippingInfo.name" id="shippingName" :readonly="!isEditing"
+              placeholder="Enter your name" />
+          </div>
+          <div class="form-group">
+            <label for="shippingDob">Date of Birth</label>
+            <input type="text" v-model="shippingInfo.dob" id="shippingDob" :readonly="!isEditing"
+              placeholder="Enter your date of birth" />
+          </div>
+          <div class="form-group">
+            <label for="shippingAddress">Address</label>
+            <input type="text" v-model="shippingInfo.address" id="shippingAddress" :readonly="!isEditing"
+              placeholder="Enter your address" />
+          </div>
+          <div class="form-group">
+            <label for="shippingCountry">Country</label>
+            <input type="text" v-model="shippingInfo.country" id="shippingCountry" :readonly="!isEditing"
+              placeholder="Enter your country" />
+          </div>
+
+          <!-- Botón de editar o guardar -->
+          <button @click="toggleEditing" class="btn-edit">
+            {{ isEditing ? 'Save' : 'Edit' }}
+          </button>
+        </div>
+      </div>
+    </div>
     <div class="card-pay">
       <div class="payment">
         <form>
@@ -29,12 +64,7 @@
               <div class="form-group">
                 <label for="cardNumber">Card Number</label>
                 <div class="input-container">
-                  <input
-                    type="text"
-                    id="cardNumber"
-                    v-model="cardNumber"
-                    placeholder="Enter Card Number"
-                  />
+                  <input type="text" id="cardNumber" v-model="cardNumber" placeholder="Enter Card Number" />
                   <div class="payment-icons">
                     <i class="fa-brands fa-cc-mastercard fa-xl" style="color: #21246e"></i>
                     <i class="fa-brands fa-cc-visa fa-xl" style="color: #21246e"></i>
@@ -51,9 +81,7 @@
               <div class="form-group">
                 <div class="tooltip-container">
                   <label for="cvv">CVV</label>
-                  <span class="tooltip-icon" @mouseover="showTooltip" @mouseleave="hideTooltip"
-                    >?</span
-                  >
+                  <span class="tooltip-icon" @mouseover="showTooltip" @mouseleave="hideTooltip">?</span>
                   <div v-if="tooltipVisible" class="tooltip-text">
                     Three-digit code on the back of your card
                   </div>
@@ -65,61 +93,6 @@
         </form>
       </div>
     </div>
-    <div class="card-information">
-  <!-- Información de envío -->
-  <div class="payment__shipping">
-    <div class="payment__title"><i class="icon icon-plane"></i> Shipping Information</div>
-
-    <!-- Mostrar la información de envío o el formulario de edición -->
-    <div class="details__user">
-      <div class="form-group">
-        <label for="shippingName">Name</label>
-        <input
-          type="text"
-          v-model="shippingInfo.name"
-          id="shippingName"
-          :readonly="!isEditing"
-          placeholder="Enter your name"
-        />
-      </div>
-      <div class="form-group">
-        <label for="shippingDob">Date of Birth</label>
-        <input
-          type="text"
-          v-model="shippingInfo.dob"
-          id="shippingDob"
-          :readonly="!isEditing"
-          placeholder="Enter your date of birth"
-        />
-      </div>
-      <div class="form-group">
-        <label for="shippingAddress">Address</label>
-        <input
-          type="text"
-          v-model="shippingInfo.address"
-          id="shippingAddress"
-          :readonly="!isEditing"
-          placeholder="Enter your address"
-        />
-      </div>
-      <div class="form-group">
-        <label for="shippingCountry">Country</label>
-        <input
-          type="text"
-          v-model="shippingInfo.country"
-          id="shippingCountry"
-          :readonly="!isEditing"
-          placeholder="Enter your country"
-        />
-      </div>
-
-      <!-- Botón de editar o guardar -->
-      <button @click="toggleEditing" class="btn-edit">
-        {{ isEditing ? 'Save' : 'Edit' }}
-      </button>
-    </div>
-  </div>
-</div>
 
   </div>
   <!-- Botón de acción -->
@@ -194,8 +167,10 @@ export default {
 .container {
   display: flex;
   justify-content: center;
-  flex-direction: row; /* Asegura que las secciones estén una debajo de la otra */
-  margin-top: 20px; /* Reduce el margen superior */
+  flex-direction: row;
+  /* Asegura que las secciones estén una debajo de la otra */
+  margin-top: 20px;
+  /* Reduce el margen superior */
   gap: 50px;
 }
 
@@ -249,8 +224,10 @@ export default {
   text-align: center;
   display: flex;
 
-  align-items: center; /* Alinea la imagen y el texto verticalmente */
-  gap: 10px; /* Espacio entre la imagen y el texto */
+  align-items: center;
+  /* Alinea la imagen y el texto verticalmente */
+  gap: 10px;
+  /* Espacio entre la imagen y el texto */
 }
 
 .payment__type.active {
@@ -284,15 +261,16 @@ export default {
 .payment-icons {
   height: auto;
   position: absolute;
-  top: 50%; 
-  right: -20px; 
-  transform: translateY(50%); 
+  top: 50%;
+  right: -20px;
+  transform: translateY(50%);
   display: flex;
-  gap: 10px; 
+  gap: 10px;
 }
 
 input {
-  width: 100%; /* Asegura que el input ocupe todo el ancho del contenedor */
+  width: 100%;
+  /* Asegura que el input ocupe todo el ancho del contenedor */
   padding: 12px;
   border-radius: 8px;
   border: 1px solid #ccc;
@@ -301,11 +279,12 @@ input {
 
 /* Ajustes adicionales para asegurar mejor separación */
 .payment__info {
-  margin-top: 30px; 
+  margin-top: 30px;
 }
 
 .form-group {
-  margin-bottom: 20px; /* Aumenta el margen inferior */
+  margin-bottom: 20px;
+  /* Aumenta el margen inferior */
   display: flex;
   flex-direction: column;
 }
@@ -335,7 +314,8 @@ input {
 /* Texto del tooltip */
 .tooltip-text {
   position: absolute;
-  bottom: 125%; /* Aparece sobre el input */
+  bottom: 125%;
+  /* Aparece sobre el input */
   left: 50%;
   transform: translateX(-50%);
   background-color: #333;
@@ -352,7 +332,7 @@ input {
 }
 
 /* Mostrar tooltip al pasar el mouse */
-.tooltip-icon:hover + .tooltip-text,
+.tooltip-icon:hover+.tooltip-text,
 .tooltip-text:hover {
   opacity: 1;
   visibility: visible;
@@ -361,7 +341,6 @@ input {
 /* Información de envío */
 .card-information {
   width: auto;
-
   padding: 20px 50px;
   border-radius: 10px;
   border: none;
@@ -408,6 +387,7 @@ input {
   flex-direction: column;
   padding: 60px 0 40px 0;
 }
+
 .btn {
   font-family: 'Josefin Sans', sans-serif;
   border-radius: 8px;
@@ -423,10 +403,12 @@ input {
   transition: all 0.15s ease;
   text-decoration: none;
 }
+
 .btn .icon {
   margin-left: 10px;
   font-size: 20px;
 }
+
 .btn:hover {
   -webkit-transform: translateY(-1px);
   transform: translateY(-1px);
@@ -434,7 +416,7 @@ input {
 }
 
 /* Responsivo */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .row-container {
     flex-direction: column;
   }
@@ -443,7 +425,9 @@ input {
     width: 100%;
   }
 }
+
 @media (max-width: 500px) {
+
   .card-pay,
   .card-information {
     width: 100%;
@@ -453,6 +437,65 @@ input {
   .form-group input {
     padding: 10px;
     font-size: 12px;
+  }
+} */
+
+@media (width < 990px) {
+  main {
+    display: flex;
+  }
+
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card-pay {
+    width: 70vw;
+  }
+
+  .row-container{
+    width: 100%;
+    align-content: space-evenly;
+    
+  }
+
+  .payment__methods {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .payment__types {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+  }
+
+  .payment__type {
+    display: flex;
+    width: auto;
+    padding: 0 10px;
+    justify-content: center;
+  }
+
+  .card-information {
+    width: 70vw;
+    
+  }
+
+  .payment__shipping {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  input {
+    box-sizing: border-box;
+    width: 100%;
+    /* Asegura que el input ocupe todo el ancho del contenedor */
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
   }
 }
 </style>
