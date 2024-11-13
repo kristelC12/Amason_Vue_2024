@@ -3,34 +3,66 @@
     <div class="card-information">
       <!-- Información de envío -->
       <div class="payment__shipping">
-        <div class="payment__title"><i class="icon icon-plane"></i> Shipping Information</div>
-
         <!-- Mostrar la información de envío o el formulario de edición -->
         <div class="details__user">
           <div class="form-group">
-            <label for="shippingName">Name</label>
-            <input type="text" v-model="shippingInfo.name" id="shippingName" :readonly="!isEditing"
-              placeholder="Enter your name" />
+            <label for="shippingName">Nombre Completo</label>
+            <input
+              type="text"
+              id="shippingName"
+              name="shippingName"
+              placeholder="Ingrese su nombre"
+              :readonly="!isEditingShipping"
+            />
           </div>
           <div class="form-group">
-            <label for="shippingDob">Date of Birth</label>
-            <input type="text" v-model="shippingInfo.dob" id="shippingDob" :readonly="!isEditing"
-              placeholder="Enter your date of birth" />
+            <label for="shippingPhoN">Número de Telefono</label>
+            <input
+              type="text"
+              id="shippingPhoN"
+              name="shippingPhoN"
+              placeholder="Ingrese su número de teléfono"
+              :readonly="!isEditingShipping"
+            />
           </div>
           <div class="form-group">
-            <label for="shippingAddress">Address</label>
-            <input type="text" v-model="shippingInfo.address" id="shippingAddress" :readonly="!isEditing"
-              placeholder="Enter your address" />
-          </div>
-          <div class="form-group">
-            <label for="shippingCountry">Country</label>
-            <input type="text" v-model="shippingInfo.country" id="shippingCountry" :readonly="!isEditing"
-              placeholder="Enter your country" />
+            <label for="shippingAddress">Dirección</label>
+            <input
+              type="text"
+              id="shippingCountry"
+              name="shippingCountry"
+              placeholder="Ingrese su País"
+              :readonly="!isEditingShipping"
+            />
+
+            <input
+              type="text"
+              id="shippingCity"
+              name="shippingCity"
+              placeholder="Ingrese su Ciudad"
+              :readonly="!isEditingShipping"
+            />
+
+            <textarea
+              id="shippingAddress"
+              name="shippingAddress"
+              placeholder="Ingrese su Dirección"
+              rows="2"
+              :readonly="!isEditingShipping"
+            ></textarea>
+
+            <input
+              type="text"
+              id="shippingPCode"
+              name="shippingPCode"
+              placeholder="Ingrese su Código Postal"
+              :readonly="!isEditingShipping"
+            />
           </div>
 
           <!-- Botón de editar o guardar -->
-          <button @click="toggleEditing" class="btn-edit">
-            {{ isEditing ? 'Save' : 'Edit' }}
+          <button @click="toggleEditingShipping" class="btn-edit">
+            {{ isEditingShipping ? 'Save' : 'Edit' }}
           </button>
         </div>
       </div>
@@ -42,11 +74,19 @@
             <!-- Métodos de pago -->
             <div class="payment__methods">
               <div class="payment__types">
-                <div class="payment__type payment__type--cc active">
+                <div
+                  class="payment__type payment__type--cc"
+                  :class="{ active: selectedMethod === 'Credit Card' }"
+                  @click="selectPaymentMethod('Credit Card')"
+                >
                   <i class="fa-solid fa-credit-card fa-xl" style="color: #21246e"></i>
-                  <p>Credit/Debit Card</p>
+                  <p>Tarjeta Crédito/Débito</p>
                 </div>
-                <div class="payment__type payment__type--paypal">
+                <div
+                  class="payment__type payment__type--paypal"
+                  :class="{ active: selectedMethod === 'Paypal' }"
+                  @click="selectPaymentMethod('Paypal')"
+                >
                   <i class="fa-brands fa-paypal fa-2xl" style="color: #21246e"></i>
                   <p>Paypal</p>
                 </div>
@@ -58,48 +98,78 @@
           <div class="payment__info">
             <div class="payment__cc">
               <div class="form-group">
-                <label for="cname">Card Owner</label>
-                <input type="text" id="cname" name="cname" placeholder="Card Owner Name" />
+                <label for="cname">Nombre del propietario de la tarjeta</label>
+                <input
+                  type="text"
+                  id="cname"
+                  name="cname"
+                  placeholder="Card Owner Name"
+                  :readonly="!isEditingPayment"
+                />
               </div>
               <div class="form-group">
-                <label for="cardNumber">Card Number</label>
+                <label for="cardNumber">Número de tarjeta</label>
                 <div class="input-container">
-                  <input type="text" id="cardNumber" v-model="cardNumber" placeholder="Enter Card Number" />
+                  <input
+                    type="text"
+                    id="cardNumber"
+                    name="cardNumber"
+                    placeholder="Enter Card Number"
+                    :readonly="!isEditingPayment"
+                 pattern="\d{16}"
+                    @input="validateCardInfo"
+                  />
                   <div class="payment-icons">
                     <i class="fa-brands fa-cc-mastercard fa-xl" style="color: #21246e"></i>
                     <i class="fa-brands fa-cc-visa fa-xl" style="color: #21246e"></i>
-                    <i class="fa-brands fa-cc-apple-pay  fa-xl" style="color: #21246e"></i>
+                    <i class="fa-brands fa-cc-apple-pay fa-xl" style="color: #21246e"></i>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="input-row">
-              <div class="form-group">
-                <label for="exp">Expiration Date</label>
-                <input type="text" id="exp" name="exp" placeholder="MM/YY" />
-              </div>
-              <div class="form-group">
-                <div class="tooltip-container">
-                  <label for="cvv">CVV</label>
-                  <span class="tooltip-icon" @mouseover="showTooltip" @mouseleave="hideTooltip">?</span>
-                  <div v-if="tooltipVisible" class="tooltip-text">
-                    Three-digit code on the back of your card
-                  </div>
-                  <input type="password" id="cvv" name="cvv" placeholder="***" />
+            <div class="form-group">
+              <label for="exp">Fecha de expiración</label>
+              <input
+                type="text"
+                id="exp"
+                name="exp"
+                placeholder="MM/YY"
+                :readonly="!isEditingPayment"
+              />
+            </div>
+            <div class="form-group">
+              <div class="tooltip-container">
+                <label for="cvv">CVV</label>
+                <span class="tooltip-icon" @mouseover="showTooltip" @mouseleave="hideTooltip"
+                  >?</span
+                >
+                <div v-if="tooltipVisible" class="tooltip-text">
+                  Los tres dígitos en la parte posterior de tu tarjeta
                 </div>
+                <input
+                  type="password"
+                  id="cvv"
+                  name="cvv"
+                  placeholder="***"
+                  :readonly="!isEditingPayment"
+                  pattern="\d{3}"
+                  @input="validateCVV"
+                />
               </div>
             </div>
           </div>
         </form>
+        <button @click="toggleEditingPayment" class="btn-edit">
+          {{ isEditingPayment ? 'Save' : 'Edit' }}
+        </button>
       </div>
     </div>
-
   </div>
   <!-- Botón de acción -->
   <div class="container">
     <div class="actions">
       <button type="submit" class="btn action__submit">
-        Place your Order
+        Completar la Orden
         <i class="icon icon-arrow-right-circle"></i>
       </button>
     </div>
@@ -112,18 +182,13 @@ export default {
   data() {
     return {
       tooltipVisible: false, // Controla la visibilidad del tooltip
-      isEditing: false,
-      shippingInfo: {
-        name: 'no especificado',
-        dob: 'no especificado',
-        address: 'no especificado',
-        country: 'no especificado'
-      },
+      isEditingShipping: false,
+      isEditingPayment: false,
+      selectedMethod: 'Credit Card',
       paymentMethods: [
         { name: 'Credit Card', icon: 'fa-cc-visa' },
         { name: 'Paypal', icon: 'fa-paypal' }
-      ],
-      selectedMethod: 'Credit Card'
+      ]
     }
   },
   methods: {
@@ -133,31 +198,32 @@ export default {
     hideTooltip() {
       this.tooltipVisible = false
     },
-    editShippingInfo() {
-      this.isEditing = true
+    toggleEditingShipping() {
+      this.isEditingShipping = !this.isEditingShipping
+      if (!this.isEditingShipping) {
+        console.log(this.shippingInfo)
+      }
     },
-    saveShippingInfo() {
-      this.isEditing = false
-      console.log(this.shippingInfo)
+    toggleEditingPayment() {
+      this.isEditingPayment = !this.isEditingPayment
+      if (!this.isEditingPayment) {
+        console.log(this.paymentInfo)
+      }
     },
-    validateCardInfo() {
-      const cardNumberPattern = /^\d{16}$/
-      const expPattern = /^(0[1-9]|1[0-2])\/\d{2}$/
-      const cvvPattern = /^\d{3}$/
-
-      if (!cardNumberPattern.test(this.shippingInfo.cardNumber)) {
-        alert('Invalid Card Number')
-        return false
+    validateCVV(event) {
+      const value = event.target.value
+      if (!/^\d{0,3}$/.test(value)) {
+        event.target.value = value.slice(0, 3)
       }
-      if (!expPattern.test(this.shippingInfo.exp)) {
-        alert('Invalid Expiration Date')
-        return false
+    },
+    selectPaymentMethod(method) {
+      this.selectedMethod = method
+    },
+    validateCardInfo(event) {
+      const credit = event.target.value
+      if (!/^\d{0,16}$/.test(credit)) {
+        event.target.value = credit.slice(0, 16)
       }
-      if (!cvvPattern.test(this.shippingInfo.cvv)) {
-        alert('Invalid CVV')
-        return false
-      }
-      return true
     }
   }
 }
@@ -168,16 +234,13 @@ export default {
   display: flex;
   justify-content: center;
   flex-direction: row;
-  /* Asegura que las secciones estén una debajo de la otra */
-  margin-top: 20px;
-  /* Reduce el margen superior */
+  margin-top: 30px;
   gap: 50px;
 }
 
 /* Estilos generales */
 .card-pay {
   width: 500px;
-
   padding: 20px 50px;
   border-radius: 10px;
   border: none;
@@ -192,17 +255,16 @@ export default {
 .row-container {
   display: flex;
   justify-content: space-between;
-  gap: 15px;
+  gap: 10px;
 }
 
 /* Métodos de pago */
 .payment__types {
   display: flex;
   justify-content: center;
-
   align-content: center;
   align-self: center;
-  gap: 20px;
+  gap: 10px;
   width: 500px;
   height: 70px;
 }
@@ -223,11 +285,8 @@ export default {
   flex: 1;
   text-align: center;
   display: flex;
-
   align-items: center;
-  /* Alinea la imagen y el texto verticalmente */
   gap: 10px;
-  /* Espacio entre la imagen y el texto */
 }
 
 .payment__type.active {
@@ -255,7 +314,6 @@ export default {
 .input-container {
   position: relative;
   width: 100%;
-
 }
 
 .payment-icons {
@@ -268,10 +326,11 @@ export default {
   gap: 10px;
 }
 
-input {
+input,
+textarea {
   width: 100%;
-  /* Asegura que el input ocupe todo el ancho del contenedor */
   padding: 12px;
+  margin-bottom: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 14px;
@@ -283,8 +342,7 @@ input {
 }
 
 .form-group {
-  margin-bottom: 20px;
-  /* Aumenta el margen inferior */
+  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
 }
@@ -315,7 +373,6 @@ input {
 .tooltip-text {
   position: absolute;
   bottom: 125%;
-  /* Aparece sobre el input */
   left: 50%;
   transform: translateX(-50%);
   background-color: #333;
@@ -332,7 +389,7 @@ input {
 }
 
 /* Mostrar tooltip al pasar el mouse */
-.tooltip-icon:hover+.tooltip-text,
+.tooltip-icon:hover + .tooltip-text,
 .tooltip-text:hover {
   opacity: 1;
   visibility: visible;
@@ -340,7 +397,8 @@ input {
 
 /* Información de envío */
 .card-information {
-  width: auto;
+  width: 320px;
+  height: auto;
   padding: 20px 50px;
   border-radius: 10px;
   border: none;
@@ -348,8 +406,8 @@ input {
 }
 
 .payment__shipping {
-  background: #f9f9f9;
-  padding: 10px;
+  padding: 10px 0;
+  margin: 0;
   border-radius: 10px;
 }
 
@@ -365,18 +423,22 @@ input {
 
 .btn-edit,
 .btn-save {
-  background-color: #4caf50;
+  width: 100px;
+  height: 50px;
+  background-color: #4babe2;
   color: white;
   border: none;
   padding: 10px 20px;
+  font-size: 18px;
   cursor: pointer;
   border-radius: 5px;
-  margin-top: 10px;
+  display: block;
+  margin: 0 auto;
 }
 
 .btn-edit:hover,
 .btn-save:hover {
-  background-color: #45a049;
+  background-color: #3584b3;
 }
 
 /* Botón de enviar */
@@ -394,7 +456,7 @@ input {
   border: 0;
   letter-spacing: 1px;
   color: #fff;
-  background: #246eea;
+  background-color: #f1a80b;
   padding: 20px 60px;
   white-space: nowrap;
   font-size: 16px;
@@ -412,7 +474,7 @@ input {
 .btn:hover {
   -webkit-transform: translateY(-1px);
   transform: translateY(-1px);
-  background: #4984ea;
+  background-color: #f0ba47;
 }
 
 /* Responsivo */
@@ -454,10 +516,9 @@ input {
     width: 70vw;
   }
 
-  .row-container{
+  .row-container {
     width: 100%;
     align-content: space-evenly;
-    
   }
 
   .payment__methods {
@@ -480,7 +541,6 @@ input {
 
   .card-information {
     width: 70vw;
-    
   }
 
   .payment__shipping {
@@ -491,7 +551,6 @@ input {
   input {
     box-sizing: border-box;
     width: 100%;
-    /* Asegura que el input ocupe todo el ancho del contenedor */
     padding: 12px;
     border-radius: 8px;
     border: 1px solid #ccc;

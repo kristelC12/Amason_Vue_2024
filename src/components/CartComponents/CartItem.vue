@@ -209,6 +209,8 @@ export default {
   .details-card .description-item .bold,
   .details-card .description-item .delivery {
     font-size: 16px;
+    max-height: 100%; /* Permite que la descripción ocupe todo el ancho disponible */
+    white-space: normal;
   }
 
   .details-card .group .quantity {
@@ -249,6 +251,8 @@ export default {
   .details-card .description-item .delivery {
     font-size: 14px;
     line-height: 0.1;
+    max-height: 100%; /* Permite que la descripción ocupe todo el ancho disponible */
+    white-space: normal;
     
   }
 
