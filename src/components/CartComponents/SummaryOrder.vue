@@ -12,7 +12,7 @@
       <div class="gray-line"></div>
     </div>
     <router-link to="/CheckOut">
-      <button class="btn">Check Out</button>
+      <button class="btn" @click="createOrder">Check Out</button>
     </router-link>
     <div class="payments">
       <div class="method">
@@ -34,12 +34,32 @@
 
 <script>
 import { mapGetters } from 'vuex'
-
+import api from '../../../services/api'
 export default {
   name: 'SummaryOrder',
   computed: {
     ...mapGetters('cart', ['cartItems', 'formattedTotalAmount'])
   },
+
+  methods: {
+    async createOrder() {
+      const response = await api.get('/user',
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      )
+
+      
+      const responseOrderCreate = await api.post('/order/create',
+        {
+          'user_id': response.data.user,
+          'status': 1
+        },
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      )
+
+      console.log(responseOrderCreate)
+
+    }
+  }
 
 
 };
@@ -174,19 +194,20 @@ i {
     align-self: center;
     height: 5vw;
   }
-  
+
   .information .total {
     font-size: 20px;
   }
 
-  .information .total .bold{
+  .information .total .bold {
     font-size: 1.1rem;
-     color: white;
+    color: white;
   }
 
   .payments,
   .information .units,
-  .information .gray-line, .information .total .tex{
+  .information .gray-line,
+  .information .total .tex {
     display: none;
   }
 
