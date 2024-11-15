@@ -25,7 +25,7 @@ export default {
   methods: {
     async fetchCategories() {
       try {
-        const response = await api.get('/category');
+        const response = await api.get('/categorias');
         if (response.status === 200) {
           this.categories = response.data.map(category => {
             // Agregar 4 items quemados
