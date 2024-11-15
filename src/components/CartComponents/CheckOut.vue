@@ -12,17 +12,15 @@
               id="shippingName"
               name="shippingName"
               placeholder="Ingrese su nombre"
-              :readonly="!isEditingShipping"
             />
           </div>
           <div class="form-group">
-            <label for="shippingPhoN">Número de Telefono</label>
+            <label for="shippingPhoN">Número de Teléfono</label>
             <input
               type="text"
               id="shippingPhoN"
               name="shippingPhoN"
               placeholder="Ingrese su número de teléfono"
-              :readonly="!isEditingShipping"
             />
           </div>
           <div class="form-group">
@@ -32,38 +30,26 @@
               id="shippingCountry"
               name="shippingCountry"
               placeholder="Ingrese su País"
-              :readonly="!isEditingShipping"
             />
-
             <input
               type="text"
               id="shippingCity"
               name="shippingCity"
               placeholder="Ingrese su Ciudad"
-              :readonly="!isEditingShipping"
             />
-
             <textarea
               id="shippingAddress"
               name="shippingAddress"
-              placeholder="Ingrese su Dirección"
+              placeholder="Ingrese su Dirección Exacta"
               rows="2"
-              :readonly="!isEditingShipping"
             ></textarea>
-
             <input
               type="text"
               id="shippingPCode"
               name="shippingPCode"
               placeholder="Ingrese su Código Postal"
-              :readonly="!isEditingShipping"
             />
           </div>
-
-          <!-- Botón de editar o guardar -->
-          <button @click="toggleEditingShipping" class="btn-edit">
-            {{ isEditingShipping ? 'Save' : 'Edit' }}
-          </button>
         </div>
       </div>
     </div>
@@ -85,8 +71,7 @@
                 <div
                   class="payment__type payment__type--paypal"
                   :class="{ active: selectedMethod === 'Paypal' }"
-                  @click="selectPaymentMethod('Paypal')"
-                >
+                  @click="selectPaymentMethod('Paypal')">
                   <i class="fa-brands fa-paypal fa-2xl" style="color: #21246e"></i>
                   <p>Paypal</p>
                 </div>
@@ -104,7 +89,6 @@
                   id="cname"
                   name="cname"
                   placeholder="Card Owner Name"
-                  :readonly="!isEditingPayment"
                 />
               </div>
               <div class="form-group">
@@ -115,9 +99,7 @@
                     id="cardNumber"
                     name="cardNumber"
                     placeholder="Enter Card Number"
-                    :readonly="!isEditingPayment"
-                 pattern="\d{16}"
-                    @input="validateCardInfo"
+                    pattern="\d{4}-\d{4}-\d{4}-\d{4}"
                   />
                   <div class="payment-icons">
                     <i class="fa-brands fa-cc-mastercard fa-xl" style="color: #21246e"></i>
@@ -134,7 +116,7 @@
                 id="exp"
                 name="exp"
                 placeholder="MM/YY"
-                :readonly="!isEditingPayment"
+                pattern="(0[1-9]|1[0-2])\/\d{2}"
               />
             </div>
             <div class="form-group">
@@ -151,24 +133,19 @@
                   id="cvv"
                   name="cvv"
                   placeholder="***"
-                  :readonly="!isEditingPayment"
                   pattern="\d{3}"
-                  @input="validateCVV"
                 />
               </div>
             </div>
           </div>
         </form>
-        <button @click="toggleEditingPayment" class="btn-edit">
-          {{ isEditingPayment ? 'Save' : 'Edit' }}
-        </button>
       </div>
     </div>
   </div>
   <!-- Botón de acción -->
   <div class="container">
     <div class="actions">
-      <button type="submit" class="btn action__submit">
+      <button @click="completeOrder" type="button" class="btn action__submit">
         Completar la Orden
         <i class="icon icon-arrow-right-circle"></i>
       </button>
@@ -182,47 +159,89 @@ export default {
   data() {
     return {
       tooltipVisible: false, // Controla la visibilidad del tooltip
-      isEditingShipping: false,
-      isEditingPayment: false,
-      selectedMethod: 'Credit Card',
-      paymentMethods: [
-        { name: 'Credit Card', icon: 'fa-cc-visa' },
-        { name: 'Paypal', icon: 'fa-paypal' }
-      ]
+      selectedMethod: 'Credit Card'
     }
   },
   methods: {
+    // Mostrar y ocultar tooltip
     showTooltip() {
       this.tooltipVisible = true
     },
     hideTooltip() {
       this.tooltipVisible = false
     },
-    toggleEditingShipping() {
-      this.isEditingShipping = !this.isEditingShipping
-      if (!this.isEditingShipping) {
-        console.log(this.shippingInfo)
+
+    // Validar información de envío
+    validateShippingInfo() {
+      const shippingName = document.getElementById('shippingName').value
+      const shippingPhoN = document.getElementById('shippingPhoN').value
+      const shippingCountry = document.getElementById('shippingCountry').value
+      const shippingCity = document.getElementById('shippingCity').value
+      const shippingAddress = document.getElementById('shippingAddress').value
+      const shippingPCode = document.getElementById('shippingPCode').value
+
+      if (
+        !shippingName ||
+        !shippingPhoN ||
+        !shippingCountry ||
+        !shippingCity ||
+        !shippingAddress ||
+        !shippingPCode
+      ) {
+        alert('Por favor, complete toda la información de envío.')
+        return false
       }
-    },
-    toggleEditingPayment() {
-      this.isEditingPayment = !this.isEditingPayment
-      if (!this.isEditingPayment) {
-        console.log(this.paymentInfo)
+      if (!/^\d{8,15}$/.test(shippingPhoN)) {
+        alert('Número de teléfono inválido.')
+        return false
       }
+
+      return true
     },
-    validateCVV(event) {
-      const value = event.target.value
-      if (!/^\d{0,3}$/.test(value)) {
-        event.target.value = value.slice(0, 3)
+
+    // Validar información de pago
+    validatePaymentInfo() {
+      const cardName = document.getElementById('cname').value
+      const cardNumber = document.getElementById('cardNumber').value
+      const expDate = document.getElementById('exp').value
+      const cvv = document.getElementById('cvv').value
+
+      if (!cardName || !cardNumber || !expDate || !cvv) {
+        alert('Por favor, complete toda la información de pago.')
+        return false
       }
+      if (!/^\d{16}$/.test(cardNumber.replace(/\s/g, ''))) {
+        alert('Número de tarjeta inválido.')
+        return false
+      }
+
+      const expPattern = /^(0[1-9]|1[0-2])\/\d{2}$/
+      if (!expPattern.test(expDate)) {
+        alert('Fecha de expiración inválida.')
+        return false
+      }
+
+      const [month, year] = expDate.split('/').map(Number)
+      const currentYear = new Date().getFullYear() % 100
+      const currentMonth = new Date().getMonth() + 1
+
+      if (year < currentYear || (year === currentYear && month < currentMonth)) {
+        alert('La tarjeta ha expirado.')
+        return false
+      }
+
+      if (!/^\d{3}$/.test(cvv)) {
+        alert('CVV inválido.')
+        return false
+      }
+
+      return true
     },
-    selectPaymentMethod(method) {
-      this.selectedMethod = method
-    },
-    validateCardInfo(event) {
-      const credit = event.target.value
-      if (!/^\d{0,16}$/.test(credit)) {
-        event.target.value = credit.slice(0, 16)
+
+    // Validar y completar la orden
+    completeOrder() {
+      if (this.validateShippingInfo() && this.validatePaymentInfo()) {
+        alert('Orden completada con éxito.')
       }
     }
   }
@@ -421,37 +440,16 @@ textarea {
   margin-bottom: 5px;
 }
 
-.btn-edit,
-.btn-save {
-  width: 100px;
-  height: 50px;
-  background-color: #4babe2;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 18px;
-  cursor: pointer;
-  border-radius: 5px;
-  display: block;
-  margin: 0 auto;
-}
-
-.btn-edit:hover,
-.btn-save:hover {
-  background-color: #3584b3;
-}
-
 /* Botón de enviar */
 .actions {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  padding: 60px 0 40px 0;
+  padding: 20px 0 40px 0;
 }
 
 .btn {
-  font-family: 'Josefin Sans', sans-serif;
   border-radius: 8px;
   border: 0;
   letter-spacing: 1px;
