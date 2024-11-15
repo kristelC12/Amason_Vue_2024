@@ -7,48 +7,19 @@
         <div class="details__user">
           <div class="form-group">
             <label for="shippingName">Nombre Completo</label>
-            <input
-              type="text"
-              id="shippingName"
-              name="shippingName"
-              placeholder="Ingrese su nombre"
-            />
+            <input type="text" id="shippingName" name="shippingName" placeholder="Ingrese su nombre" />
           </div>
           <div class="form-group">
             <label for="shippingPhoN">Número de Teléfono</label>
-            <input
-              type="text"
-              id="shippingPhoN"
-              name="shippingPhoN"
-              placeholder="Ingrese su número de teléfono"
-            />
+            <input type="text" id="shippingPhoN" name="shippingPhoN" placeholder="Ingrese su número de teléfono" />
           </div>
           <div class="form-group">
             <label for="shippingAddress">Dirección</label>
-            <input
-              type="text"
-              id="shippingCountry"
-              name="shippingCountry"
-              placeholder="Ingrese su País"
-            />
-            <input
-              type="text"
-              id="shippingCity"
-              name="shippingCity"
-              placeholder="Ingrese su Ciudad"
-            />
-            <textarea
-              id="shippingAddress"
-              name="shippingAddress"
-              placeholder="Ingrese su Dirección Exacta"
-              rows="2"
-            ></textarea>
-            <input
-              type="text"
-              id="shippingPCode"
-              name="shippingPCode"
-              placeholder="Ingrese su Código Postal"
-            />
+            <input type="text" id="shippingCountry" name="shippingCountry" placeholder="Ingrese su País" />
+            <input type="text" id="shippingCity" name="shippingCity" placeholder="Ingrese su Ciudad" />
+            <textarea id="shippingAddress" name="shippingAddress" class="" placeholder="Ingrese su Dirección Exacta"
+              rows="2"></textarea>
+            <input type="text" id="shippingPCode" name="shippingPCode" placeholder="Ingrese su Código Postal" />
           </div>
         </div>
       </div>
@@ -60,17 +31,12 @@
             <!-- Métodos de pago -->
             <div class="payment__methods">
               <div class="payment__types">
-                <div
-                  class="payment__type payment__type--cc"
-                  :class="{ active: selectedMethod === 'Credit Card' }"
-                  @click="selectPaymentMethod('Credit Card')"
-                >
+                <div class="payment__type payment__type--cc" :class="{ active: selectedMethod === 'Credit Card' }"
+                  @click="selectPaymentMethod('Credit Card')">
                   <i class="fa-solid fa-credit-card fa-xl" style="color: #21246e"></i>
                   <p>Tarjeta Crédito/Débito</p>
                 </div>
-                <div
-                  class="payment__type payment__type--paypal"
-                  :class="{ active: selectedMethod === 'Paypal' }"
+                <div class="payment__type payment__type--paypal" :class="{ active: selectedMethod === 'Paypal' }"
                   @click="selectPaymentMethod('Paypal')">
                   <i class="fa-brands fa-paypal fa-2xl" style="color: #21246e"></i>
                   <p>Paypal</p>
@@ -84,23 +50,13 @@
             <div class="payment__cc">
               <div class="form-group">
                 <label for="cname">Nombre del propietario de la tarjeta</label>
-                <input
-                  type="text"
-                  id="cname"
-                  name="cname"
-                  placeholder="Card Owner Name"
-                />
+                <input type="text" id="cname" name="cname" placeholder="Card Owner Name" />
               </div>
               <div class="form-group">
                 <label for="cardNumber">Número de tarjeta</label>
                 <div class="input-container">
-                  <input
-                    type="text"
-                    id="cardNumber"
-                    name="cardNumber"
-                    placeholder="Enter Card Number"
-                    pattern="\d{4}-\d{4}-\d{4}-\d{4}"
-                  />
+                  <input type="text" id="cardNumber" name="cardNumber" placeholder="Enter Card Number"
+                    pattern="\d{4}-\d{4}-\d{4}-\d{4}" />
                   <div class="payment-icons">
                     <i class="fa-brands fa-cc-mastercard fa-xl" style="color: #21246e"></i>
                     <i class="fa-brands fa-cc-visa fa-xl" style="color: #21246e"></i>
@@ -111,30 +67,16 @@
             </div>
             <div class="form-group">
               <label for="exp">Fecha de expiración</label>
-              <input
-                type="text"
-                id="exp"
-                name="exp"
-                placeholder="MM/YY"
-                pattern="(0[1-9]|1[0-2])\/\d{2}"
-              />
+              <input type="text" id="exp" name="exp" placeholder="MM/YY" pattern="(0[1-9]|1[0-2])\/\d{2}" />
             </div>
             <div class="form-group">
               <div class="tooltip-container">
                 <label for="cvv">CVV</label>
-                <span class="tooltip-icon" @mouseover="showTooltip" @mouseleave="hideTooltip"
-                  >?</span
-                >
+                <span class="tooltip-icon" @mouseover="showTooltip" @mouseleave="hideTooltip">?</span>
                 <div v-if="tooltipVisible" class="tooltip-text">
                   Los tres dígitos en la parte posterior de tu tarjeta
                 </div>
-                <input
-                  type="password"
-                  id="cvv"
-                  name="cvv"
-                  placeholder="***"
-                  pattern="\d{3}"
-                />
+                <input type="password" id="cvv" name="cvv" placeholder="***" pattern="\d{3}" />
               </div>
             </div>
           </div>
@@ -159,7 +101,15 @@ export default {
   data() {
     return {
       tooltipVisible: false, // Controla la visibilidad del tooltip
-      selectedMethod: 'Credit Card'
+      selectedMethod: 'Credit Card',
+
+      user: {
+        paymentMethod: ''
+      },
+      paymentMethods: [
+        { name: 'Credit Card', icon: 'fa-cc-visa' },
+        { name: 'Paypal', icon: 'fa-paypal' }
+      ]
     }
   },
   methods: {
@@ -198,7 +148,10 @@ export default {
 
       return true
     },
-
+    selectPaymentMethod(method) {
+      this.selectedMethod = method
+      this.user.paymentMethod = method
+    },
     // Validar información de pago
     validatePaymentInfo() {
       const cardName = document.getElementById('cname').value
@@ -348,6 +301,9 @@ export default {
 input,
 textarea {
   width: 100%;
+  max-width: 100%;
+  min-width: 100%;
+  min-height: 18px;
   padding: 12px;
   margin-bottom: 10px;
   border-radius: 8px;
@@ -408,7 +364,7 @@ textarea {
 }
 
 /* Mostrar tooltip al pasar el mouse */
-.tooltip-icon:hover + .tooltip-text,
+.tooltip-icon:hover+.tooltip-text,
 .tooltip-text:hover {
   opacity: 1;
   visibility: visible;
@@ -550,6 +506,15 @@ textarea {
     box-sizing: border-box;
     width: 100%;
     padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+
+  textArea {
+    box-sizing: border-box;
+    width: 100%;
+  
     border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 14px;
