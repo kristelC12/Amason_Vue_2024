@@ -7,19 +7,24 @@
         <div class="details__user">
           <div class="form-group">
             <label for="shippingName">Nombre Completo</label>
-            <input type="text" id="shippingName" name="shippingName" placeholder="Ingrese su nombre" />
+            <input type="text" id="shippingName" name="shippingName" placeholder="Ingrese su nombre"
+              v-model="user.name" />
           </div>
           <div class="form-group">
             <label for="shippingPhoN">Número de Teléfono</label>
-            <input type="text" id="shippingPhoN" name="shippingPhoN" placeholder="Ingrese su número de teléfono" />
+            <input type="text" id="shippingPhoN" name="shippingPhoN" placeholder="Ingrese su número de teléfono"
+              v-model="user.phone" />
           </div>
           <div class="form-group">
             <label for="shippingAddress">Dirección</label>
-            <input type="text" id="shippingCountry" name="shippingCountry" placeholder="Ingrese su País" />
-            <input type="text" id="shippingCity" name="shippingCity" placeholder="Ingrese su Ciudad" />
+            <input type="text" id="shippingCountry" name="shippingCountry" placeholder="Ingrese su País"
+              v-model="user.country" />
+            <input type="text" id="shippingCity" name="shippingCity" placeholder="Ingrese su Ciudad"
+              v-model="user.city" />
             <textarea id="shippingAddress" name="shippingAddress" class="" placeholder="Ingrese su Dirección Exacta"
-              rows="2"></textarea>
-            <input type="text" id="shippingPCode" name="shippingPCode" placeholder="Ingrese su Código Postal" />
+              rows="2" v-model="user.address"></textarea>
+            <input type="text" id="shippingPCode" name="shippingPCode" placeholder="Ingrese su Código Postal"
+              v-model="user.postal_code" />
           </div>
         </div>
       </div>
@@ -31,13 +36,13 @@
             <!-- Métodos de pago -->
             <div class="payment__methods">
               <div class="payment__types">
-                <div class="payment__type payment__type--cc" :class="{ active: selectedMethod === 'Credit Card' }"
-                  @click="selectPaymentMethod('Credit Card')">
+                <div class="payment__type payment__type--cc" :class="{ active: selectedMethod === 'card' }"
+                  @click="selectPaymentMethod('card')">
                   <i class="fa-solid fa-credit-card fa-xl" style="color: #21246e"></i>
                   <p>Tarjeta Crédito/Débito</p>
                 </div>
-                <div class="payment__type payment__type--paypal" :class="{ active: selectedMethod === 'Paypal' }"
-                  @click="selectPaymentMethod('Paypal')">
+                <div class="payment__type payment__type--paypal" :class="{ active: selectedMethod === 'paypal' }"
+                  @click="selectPaymentMethod('paypal')">
                   <i class="fa-brands fa-paypal fa-2xl" style="color: #21246e"></i>
                   <p>Paypal</p>
                 </div>
@@ -55,7 +60,7 @@
               <div class="form-group">
                 <label for="cardNumber">Número de tarjeta</label>
                 <div class="input-container">
-                  <input type="text" id="cardNumber" name="cardNumber" placeholder="Enter Card Number"
+                  <input type="text" id="cardNumber" name="cardNumber" placeholder="Enter Card Number" v-model="user.cardNumber"
                     pattern="\d{4}-\d{4}-\d{4}-\d{4}" />
                   <div class="payment-icons">
                     <i class="fa-brands fa-cc-mastercard fa-xl" style="color: #21246e"></i>
@@ -96,20 +101,29 @@
 </template>
 
 <script>
+import api from '../../../services/api'
+
 export default {
   name: 'CheckoutComponent',
   data() {
     return {
       tooltipVisible: false, // Controla la visibilidad del tooltip
-      selectedMethod: 'Credit Card',
-
+      selectedMethod: 'card',
       user: {
-        paymentMethod: ''
+        name: '',
+        phone: '',
+        country: '',
+        city: '',
+        address: '',
+        postal_code: '',
+        cardNumber: '',
+        paymentMethod: 'card'
       },
       paymentMethods: [
-        { name: 'Credit Card', icon: 'fa-cc-visa' },
-        { name: 'Paypal', icon: 'fa-paypal' }
+        { name: 'card', icon: 'fa-cc-visa' },
+        { name: 'paypal', icon: 'fa-paypal' }
       ]
+
     }
   },
   methods: {
@@ -121,6 +135,10 @@ export default {
       this.tooltipVisible = false
     },
 
+    selectPaymentMethod(method) {
+      this.selectedMethod = method
+      this.user.paymentMethod = method
+    },
     // Validar información de envío
     validateShippingInfo() {
       const shippingName = document.getElementById('shippingName').value
@@ -148,10 +166,7 @@ export default {
 
       return true
     },
-    selectPaymentMethod(method) {
-      this.selectedMethod = method
-      this.user.paymentMethod = method
-    },
+
     // Validar información de pago
     validatePaymentInfo() {
       const cardName = document.getElementById('cname').value
@@ -167,36 +182,87 @@ export default {
         alert('Número de tarjeta inválido.')
         return false
       }
-
-      const expPattern = /^(0[1-9]|1[0-2])\/\d{2}$/
-      if (!expPattern.test(expDate)) {
-        alert('Fecha de expiración inválida.')
-        return false
-      }
-
-      const [month, year] = expDate.split('/').map(Number)
-      const currentYear = new Date().getFullYear() % 100
-      const currentMonth = new Date().getMonth() + 1
-
-      if (year < currentYear || (year === currentYear && month < currentMonth)) {
-        alert('La tarjeta ha expirado.')
-        return false
-      }
-
-      if (!/^\d{3}$/.test(cvv)) {
-        alert('CVV inválido.')
-        return false
-      }
-
       return true
     },
 
     // Validar y completar la orden
-    completeOrder() {
+    async completeOrder() {
+
+      
       if (this.validateShippingInfo() && this.validatePaymentInfo()) {
-        alert('Orden completada con éxito.')
+        const banderaInfo = await this.actualizarInformacionUsuario(this.user)
+
+        if (banderaInfo) {
+          if (window.confirm('¿Desea completar la compra?')) {
+            
+            this.procesarOrden({
+              paymentMethod: this.user.paymentMethod,
+              cardNumber: this.user.cardNumber
+            })
+            this.$router.push('/Menu')
+          }
+        }
       }
+    },
+
+    async procesarOrden(datosOrden) {
+      try {
+        console.log(datosOrden)
+        const response = await api.post('/order/process', datosOrden, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          },
+
+        })
+
+        if (response.status === 404) {
+          alert('Orden no encontrada')
+        }
+
+      } catch (error) {
+        console.error('Error al procesar la orden:', error)
+      }
+    },
+
+    async obtenerInformacionUsuario() {
+      try {
+        const response = await api.get('/deliveryInformation',
+          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+        )
+        if (response.status === 200) {
+          this.user = response.data
+
+        } else if (response.status === 400) {
+          alert('No se encontró información de envío')
+        }
+
+        console.log(response)
+      } catch (error) {
+        console.error()
+        return false
+      }
+    },
+
+    async actualizarInformacionUsuario(user) {
+      try {
+        const response = await api.put('/deliveryInformation', user,
+          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+        )
+
+        if (response.status === 200) {
+          return true
+        }
+
+      } catch (error) {
+        console.error('Error al actualizar la información del usuario:', error)
+        return false
+      }
+
     }
+
+  },
+  mounted() {
+    this.obtenerInformacionUsuario()
   }
 }
 </script>
@@ -514,7 +580,7 @@ textarea {
   textArea {
     box-sizing: border-box;
     width: 100%;
-  
+
     border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 14px;
