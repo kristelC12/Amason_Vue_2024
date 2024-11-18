@@ -66,7 +66,12 @@ export default {
     showModal: {
       type: Boolean,
       required: true, // Opción si es obligatorio
-    }
+    
+  },
+    storeId: { // Recibe el ID de la tienda
+      type: Number,
+      required: true,
+    },
   },
   data() {
     return {
@@ -76,7 +81,7 @@ export default {
         price: '',
         stock: '',
         description: '',
-        id_store: 1 // Asignar directamente aquí el ID de la tienda
+        id_store: this.storeId, // Asigna el ID de la tienda al producto
       },
       imageLinksText: '', // Aquí se almacenarán las URLs ingresadas por el usuario
       
@@ -97,7 +102,9 @@ export default {
     // Agregamos los links al objeto de producto
     const newProduct = {
       ...this.product,
+      id_store: this.storeId, 
       image_links: imageLinks, // Asignamos los links de imágenes
+      
     };
 
     console.log('Enviando nuevo producto:', newProduct);
@@ -114,7 +121,7 @@ export default {
       price: '',
       stock: '',
       category_id: '',
-      id_store: 1,
+      
     };
     this.imageLinksText = ''; // Limpiar el campo de links de imágenes
 
@@ -127,6 +134,13 @@ export default {
 
 
   },
+  watch: {
+    showModal(value) {
+      if (value) {
+        console.log(`Abriendo ventana de creación de producto para la tienda con ID: ${this.storeId}`);
+      }
+    }
+  }
 };
 </script>
 
@@ -141,15 +155,21 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 10px; /* Espacio interno para pantallas pequeñas */
+  box-sizing: border-box;
+  overflow-y: auto; /* Permite desplazamiento en caso de contenido largo */
 }
 
 .modal-content {
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
-  width: 350px;
+  width: 100%; /* Ancho completo para pantallas pequeñas */
+  max-width: 500px; /* Ancho máximo en pantallas grandes */
+  max-height: 90vh; /* Limitar altura al 90% de la ventana */
   position: relative;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  overflow-y: auto; /* Desplazamiento interno si el contenido supera el tamaño */
 }
 
 .close {
@@ -191,23 +211,51 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
+  flex-wrap: wrap; /* Permitir ajuste en pantallas pequeñas */
+}
+
+.cancel-button,
+.save-button {
+  flex: 1;
+  margin: 5px;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
 }
 
 .cancel-button {
   background-color: #e74c3c;
   color: #f0f0f0;
   border: 1px solid #e74c3c;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .save-button {
   background-color: #0ea5e9;
   color: white;
-  padding: 10px 20px;
   border: none;
-  border-radius: 4px;
-  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .modal-title {
+    font-size: 18px;
+  }
+
+  .form-group label {
+    font-size: 14px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .cancel-button,
+  .save-button {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
 }
 </style>
