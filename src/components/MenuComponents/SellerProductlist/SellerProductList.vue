@@ -47,11 +47,12 @@
 
     <!-- Modal para crear producto -->
     <CreateProduct
-      v-if="showCreateModal"
-      :showModal="showCreateModal"
-      @close-modal="closeCreateModal"
-      @create="addNewProduct"
-    />
+  v-if="showCreateModal"
+  :showModal="showCreateModal"
+  :store-id="storeId" 
+  @close-modal="closeCreateModal"
+  @create="addNewProduct"
+/>
 
     <DeleteConfirmationModal
       v-if="showDeleteModal"
@@ -86,10 +87,14 @@ export default {
     };
   },
   props: {
-    products: Array,
-    showModal: Boolean,
-    productId: Number
+  products: Array,
+  showModal: Boolean,
+  productId: Number,
+  storeId: { 
+    type: Number,
+    required: true,
   },
+},
   watch: {
     products(newProducts) {
       // Sincronizar la copia local cuando products cambie
@@ -97,7 +102,10 @@ export default {
     }
   },
   methods: {
-    
+    mounted() {
+  console.log("ID de tienda recibido en SellerProductList:", this.storeId);
+},
+
     formatCurrency(value) {
       return new Intl.NumberFormat('es-ES', {
         style: 'currency',
@@ -211,7 +219,9 @@ export default {
       console.log("URL de imagen del producto:", product.image);
       return product.image ? product.image : 'default_image_path';
     }
+    
   }
+  
 };
 </script>
 

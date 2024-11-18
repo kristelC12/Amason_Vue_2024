@@ -7,8 +7,11 @@
     </header>
     <main>
       <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <SellerProductList v-if="!showCreateProduct" :products="sellerProducts" @product-deleted="fetchProducts"/>
-      </div>
+        <SellerProductList
+  :products="sellerProducts"
+  :storeId="storeId" 
+  @product-deleted="fetchProducts"
+/>      </div>
     </main>
   </div>
 </template>
@@ -22,14 +25,25 @@ export default {
   components: {
     SellerProductList,
   },
-  setup() {
+
+  props: {
+    storeId: { 
+      type: Number,
+      required: true,
+    },
+  },
+  
+  setup(props) {
     const sellerProducts = ref([]);
     const showCreateProduct = ref(false);
 
     const fetchProducts = async () => {
       try {
+        console.log("ID de tienda recibido:", props.storeId); // Depuración
+
         // Realiza una llamada a la API para obtener los productos de la tienda 1
-        const response = await axios.get('http://localhost:8000/api/products/store/1');
+        const response = await axios.get(`http://localhost:8000/api/products/store/${props.storeId}`);
+
         // Asigna la respuesta de los productos al array de sellerProducts
         sellerProducts.value = response.data;
         console.log("Productos obtenidos:", sellerProducts.value);
@@ -53,6 +67,10 @@ export default {
       fetchProducts
     };
   },
+  mounted() {
+  console.log("ID de tienda recibido en SellerProduct:", this.storeId);
+}
+
 };
 </script>
 

@@ -66,7 +66,12 @@ export default {
     showModal: {
       type: Boolean,
       required: true, // Opción si es obligatorio
-    }
+    
+  },
+    storeId: { // Recibe el ID de la tienda
+      type: Number,
+      required: true,
+    },
   },
   data() {
     return {
@@ -76,7 +81,7 @@ export default {
         price: '',
         stock: '',
         description: '',
-        id_store: 1 // Asignar directamente aquí el ID de la tienda
+        id_store: this.storeId, // Asigna el ID de la tienda al producto
       },
       imageLinksText: '', // Aquí se almacenarán las URLs ingresadas por el usuario
       
@@ -97,7 +102,9 @@ export default {
     // Agregamos los links al objeto de producto
     const newProduct = {
       ...this.product,
+      id_store: this.storeId, 
       image_links: imageLinks, // Asignamos los links de imágenes
+      
     };
 
     console.log('Enviando nuevo producto:', newProduct);
@@ -114,7 +121,7 @@ export default {
       price: '',
       stock: '',
       category_id: '',
-      id_store: 1,
+      
     };
     this.imageLinksText = ''; // Limpiar el campo de links de imágenes
 
@@ -127,6 +134,13 @@ export default {
 
 
   },
+  watch: {
+    showModal(value) {
+      if (value) {
+        console.log(`Abriendo ventana de creación de producto para la tienda con ID: ${this.storeId}`);
+      }
+    }
+  }
 };
 </script>
 
