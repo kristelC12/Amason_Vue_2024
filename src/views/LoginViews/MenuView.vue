@@ -1,11 +1,13 @@
 <template>
-  <div class="categories-card">
-    <CategoryCard
+  <div class="menu-view">
+    <div class="categories-card">
+      <CategoryCard
       v-for="(category, index) in categories"
       :key="index"
       :category="category"
       @category-selected="goToProductList"
     />
+    </div>
   </div>
 </template>
 
@@ -71,5 +73,10 @@ export default {
   gap: 20px;
   justify-content: space-around;
   overflow: hidden;
+}
+.menu-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 66vh;
 }
 </style>

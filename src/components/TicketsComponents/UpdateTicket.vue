@@ -1,37 +1,38 @@
 <template>
-    <div class="background"></div>
-    <div class="chat-container">
-      <div class="chat-header">
-        <h2>Asistente de Soporte</h2>
-      </div>
-      <div ref="chatMessagesContainer" class="chat-messages">
-        <!-- Mostrar mensajes del servidor -->
-        <div
-          v-for="(message, index) in chatMessages"
-          :key="index"
-          class="message"
-          :class="{
-            'user-message': message.user_id === currentUserId,
-            'bot-message': message.user_id !== currentUserId
-          }"
-        >
+  <div class="background"></div>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>Asistente de Soporte</h2>
+    </div>
+    <div ref="chatMessagesContainer" class="chat-messages">
+      <!-- Mostrar mensajes del servidor -->
+      <div
+        v-for="(message, index) in chatMessages"
+        :key="index"
+        class="message-container"
+        :class="{
+          'my-message': message.user_id === currentUserId,
+          'other-message': message.user_id !== currentUserId
+        }"
+      >
+        <div class="message-bubble">
           <p>{{ message.message }}</p>
         </div>
       </div>
-      <div class="chat-input">
-        <textarea
-          v-model="userMessage"
-          placeholder="Escribe tu mensaje aquí..."
-          class="form-input"
-          @keydown.enter.prevent="sendMessage"
-        ></textarea>
-        <button @click="sendMessage" class="btn-send">Enviar</button>
-      </div>
-      <div class="footer1">
-        <button @click="submitTicket" class="btn-update">Actualizar</button>
-      </div>
     </div>
-    
+    <div class="chat-input">
+      <textarea
+        v-model="userMessage"
+        placeholder="Escribe tu mensaje aquí..."
+        class="form-input"
+        @keydown.enter.prevent="sendMessage"
+      ></textarea>
+      <button @click="sendMessage" class="btn-send">Enviar</button>
+    </div>
+    <div class="footer1">
+      <button @click="submitTicket" class="btn-update">Actualizar</button>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -59,7 +60,7 @@ export default {
     };
   },
   mounted() {
-    this.currentUserId = localStorage.getItem('userId'); // Asegúrate de que esto se ajuste a tu implementación
+    this.currentUserId = parseInt(localStorage.getItem('userId')); // Asegúrate de que esto se ajuste a tu implementación
     this.loadMessages();
   },
   methods: {
@@ -103,22 +104,22 @@ export default {
     },
     async submitTicket() {
       try {
-    // Lógica para actualizar el ticket (si hay alguna)
-    console.log("Ticket actualizado:", this.ticket);
-    
-    // Verifica el rol del usuario
-    const userRole = localStorage.getItem('userRole'); // Asegúrate de que esto se ajuste a tu implementación
-    if (userRole === 'admin') {
-      // Redirigir a la vista de tickets para administradores
-      this.$router.push('/admin-tickets'); // Cambia '/admin-tickets' por la ruta adecuada para admin
-    } else {
-      // Redirigir a la vista de tickets para usuarios
-      this.$router.push('/tickets'); // Cambia '/tickets' por la ruta adecuada para usuarios
+        // Lógica para actualizar el ticket (si hay alguna)
+        console.log("Ticket actualizado:", this.ticket);
+        
+        // Verifica el rol del usuario
+        const userRole = localStorage.getItem('userRole'); // Asegúrate de que esto se ajuste a tu implementación
+        if (userRole === 'admin') {
+          // Redirigir a la vista de tickets para administradores
+          this.$router.push('/admin-tickets'); // Cambia '/admin-tickets' por la ruta adecuada para admin
+        } else {
+          // Redirigir a la vista de tickets para usuarios
+          this.$router.push('/tickets'); // Cambia '/tickets' por la ruta adecuada para usuarios
+        }
+      } catch (error) {
+        console.error('Error actualizando el ticket:', error);
+      }
     }
-  } catch (error) {
-    console.error('Error actualizando el ticket:', error);
-  }
-  }
   },
 };
 </script>
@@ -163,27 +164,41 @@ export default {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
   overflow-y: auto;
   flex-grow: 1;
 }
 
-.message {
-  padding: 10px 15px;
-  border-radius: 10px;
-  max-width: 80%;
+.message-container {
+  display: flex;
+  width: 100%;
+  margin: 5px 0;
 }
 
-.bot-message {
+
+
+.other-message {
+  justify-content: left; /* Mensajes de otros a la derecha */
+}
+
+.my-message {
+  justify-content: right; /* Mis mensajes a la izquierda */
+}
+.message-bubble {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 15px;
+  word-wrap: break-word;
+}
+
+.my-message .message-bubble {
   background-color: #e9eff6;
   color: #333;
-  align-self: flex-start;
 }
 
-.user-message {
+.other-message .message-bubble {
   background-color: #00aed5;
   color: white;
-  align-self: flex-end;
 }
 
 .chat-input {
@@ -291,28 +306,5 @@ export default {
   .btn-update {
     font-size: 0.95rem;
   }
-}
-
-.chat-messages {
-  display: flex;
-  flex-direction: column;
-  max-height: 400px; /* Ajusta el alto máximo del contenedor */
-  overflow-y: auto; /* Permite el desplazamiento vertical */
-}
-
-.message {
-  margin: 5px;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.user-message {
-  align-self: flex-start; /* Alinea a la izquierda */
-  background-color: #e1ffc7; /* Cambia el color de fondo para el mensaje del usuario */
-}
-
-.bot-message {
-  align-self: flex-end; /* Alinea a la derecha */
-  background-color: #c7e1ff; /* Cambia el color de fondo para los mensajes del bot */
 }
 </style>
