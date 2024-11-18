@@ -1,43 +1,46 @@
 <template>
-  <div class="page-wrapper">
-      <div class="background"></div> 
-      <div class="main-container"> 
-          <div class="header">
-              <h2>Sistema de Tickets</h2>
-              <div class="header-actions">
-                  <router-link to="/create-ticket">
-                      <button class="btn btn-create">Crear Nuevo Ticket</button>
-                  </router-link>
-              </div>
-          </div>
-          <table class="ticket-table">
-              <thead>
-                  <tr>
-                      <th>Orden o Paquete</th>
-                      <th>Tipo de Reclamo</th>
-                      <th>Asunto</th>
-                      <th>Descripción</th>
-                      <th>Estado</th>
-                      <th>Acciones</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  <tr v-for="ticket in tickets" :key="ticket.id">
-                      <td data-label="Orden o Paquete">{{ ticket.order }}</td>
-                      <td data-label="Tipo de Reclamo">{{ ticket.claimType }}</td>
-                      <td data-label="Asunto">{{ ticket.subject }}</td>
-                      <td data-label="Descripción">{{ ticket.description }}</td>
-                      <td data-label="Estado">{{ ticket.status }}</td>
-                      <td data-label="Acciones">
-                          <button v-if="ticket.status !== 'closed'" class="btn btn-details" @click="closeTicket(ticket.id)">Cerrar Ticket</button>
-                          <router-link :to="`/update-ticket/${ticket.id}`">
-                              <button v-if="ticket.status !== 'closed'" class="btn btn-update">Actualizar Ticket</button>
-                          </router-link>
-                      </td>
-                  </tr>
-              </tbody>
-          </table>
+  <div class="menu-view">
+  <div class="page-wrapper" v-if="!loading">
+    <div class="background"></div> 
+    <div class="main-container"> 
+      <div class="header">
+        <h2>Sistema de Tickets</h2>
+        <div class="header-actions">
+          <router-link to="/create-ticket">
+            <button class="btn btn-create">Crear Nuevo Ticket</button>
+          </router-link>
+        </div>
       </div>
+      <table class="ticket-table">
+        <thead>
+          <tr>
+            <th>Orden o Paquete</th>
+            <th>Tipo de Reclamo</th>
+            <th>Asunto</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="ticket in tickets" :key="ticket.id">
+            <td data-label="Orden o Paquete">{{ ticket.order }}</td>
+            <td data-label="Tipo de Reclamo">{{ ticket.claimType }}</td>
+            <td data-label="Asunto">{{ ticket.subject }}</td>
+            <td data-label="Descripción">{{ ticket.description }}</td>
+            <td data-label="Estado">{{ ticket.status }}</td>
+            <td data-label="Acciones">
+              <button v-if="ticket.status !== 'closed'" class="btn btn-details" @click="closeTicket(ticket.id)">Cerrar Ticket</button>
+              <router-link :to="`/update-ticket/${ticket.id}`">
+                <button v-if="ticket.status !== 'closed'" class="btn btn-update">Actualizar Ticket</button>
+              </router-link>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div v-else class="loading">Cargando...</div>
   </div>
 </template>
 
@@ -46,60 +49,60 @@ import apiClient from '../../../services/api';
 
 export default { 
   data() {
-      return {
-          tickets: []  
-      };
+    return {
+      tickets: [],
+      loading: true
+    };
   },
   created() {
-      this.fetchUserTickets();
+    this.fetchUserTickets();
   },
   methods: {
-      async closeTicket(ticketId) {
-          console.log("Cerrando ticket con ID:", ticketId); // Para depuración
-          try {
-              await apiClient.put(`/tickets/${ticketId}/close`, {}, {
-                  headers: {
-                      Authorization: `Bearer ${localStorage.getItem('token')}`
-                  }
-              });
-              this.fetchUserTickets(); // Actualiza la lista de tickets
-          } catch (error) {
-              console.error('Error al cerrar el ticket:', error);
+    async closeTicket(ticketId) {
+      console.log("Cerrando ticket con ID:", ticketId); // Para depuración
+      try {
+        await apiClient.put(`/tickets/${ticketId}/close`, {}, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
           }
-      },
-      async fetchUserTickets() {
-          try {
-              const token = localStorage.getItem('token');  
-              if (!token) {
-                  throw new Error('Token de autenticación no disponible');
-              }
-              const response = await apiClient.get('/user-tickets', {
-                  headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${localStorage.getItem('token')}`,  
-                  },
-              });
-              this.tickets = response.data.map(ticket => ({
-                  id: ticket.id || ticket.ticket_id,
-                  order: ticket.order_package,            
-                  claimType: ticket.claim_type,           
-                  subject: ticket.subject,                
-                  description: ticket.description,        
-                  status: ticket.status,                  
-                  file: ticket.file,                      
-                  notifyBy: ticket.notify_by,             
-                  userId: ticket.user_id,                 
-              }));
-          } catch (error) {
-              console.error("Error al obtener los tickets:", error);
-          }
+        });
+        this.fetchUserTickets(); // Actualiza la lista de tickets
+      } catch (error) {
+        console.error('Error al cerrar el ticket:', error);
       }
+    },
+    async fetchUserTickets() {
+      try {
+        const token = localStorage.getItem('token');  
+        if (!token) {
+          throw new Error('Token de autenticación no disponible');
+        }
+        const response = await apiClient.get('/user-tickets', {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,  
+          },
+        });
+        this.tickets = response.data.map(ticket => ({
+          id: ticket.id || ticket.ticket_id,
+          order: ticket.order_package,            
+          claimType: ticket.claim_type,           
+          subject: ticket.subject,                
+          description: ticket.description,        
+          status: ticket.status,                  
+          file: ticket.file,                      
+          notifyBy: ticket.notify_by,             
+          userId: ticket.user_id,                 
+        }));
+      } catch (error) {
+        console.error("Error al obtener los tickets:", error);
+      } finally {
+        this.loading = false;
+      }
+    }
   }
 };
 </script>
-
-
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
@@ -285,6 +288,19 @@ export default {
     text-align: left;
     margin-right: 10px;
   }
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #34495e;
+  margin-top: 50px;
+}
+
+.menu-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 66vh;
 }
 </style>
 
