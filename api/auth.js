@@ -14,6 +14,7 @@ export async function loginUser(userData) {
     // Guardar token y pivotId en localStorage
     localStorage.setItem('token', token)
     localStorage.setItem('pivotId', pivotId)
+    localStorage.setItem('userId', pivotId)
     localStorage.setItem('roles', roleNames)
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
 
