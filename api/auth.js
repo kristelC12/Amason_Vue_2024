@@ -101,6 +101,13 @@ export async function createProduct(productData) {
       }
     }
 
+    // Agregar archivos de imágenes si existen
+    if (productData.images && productData.images.length > 0) {
+      for (let i = 0; i < productData.images.length; i++) {
+        formData.append('images[]', productData.images[i]);
+      }
+    }
+
     const response = await apiClient.post('/products', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -112,5 +119,53 @@ export async function createProduct(productData) {
     console.error('Error al crear el producto:', error.response?.data || error.message);
     throw new Error('Error al crear el producto');
   }
+
+  
+}export async function uploadImage(imageFile) {
+  try {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    const response = await apiClient.post('/upload-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data.url; // Devuelve la URL de la imagen subida
+  } catch (error) {
+    console.error('Error al subir la imagen:', error.response?.data || error.message);
+    throw new Error('Error al subir la imagen');
+  }
 }
+
+  export async function updateProduct(productId, productData) {
+    try {
+      const formData = new FormData();
+
+      // Añadir datos del producto al FormData
+      Object.keys(productData).forEach((key) => {
+        formData.append(key, productData[key]);
+      });
+
+      // Agregar imágenes si existen
+      if (productData.images && productData.images.length > 0) {
+        productData.images.forEach((image, index) => {
+          formData.append(`images[${index}]`, image);
+        });
+      }
+
+      const response = await apiClient.put(`/products/${productId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Error al actualizar el producto:', error.response?.data || error.message);
+      throw new Error('Error al actualizar el producto');
+    }
+  }
+
 

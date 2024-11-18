@@ -67,6 +67,7 @@ export default {
       showDeleteModal: false,
       deleteProductId: null, // ID del producto a eliminar
       selectedProduct: null,
+      
     };
   },
   props: {
@@ -115,21 +116,24 @@ export default {
 }
 
 ,
-    closeEditModal() {
-      this.showEditModal = false;
-    },
+closeEditModal() {
+  this.showEditModal = false;
+  this.fetchProducts(); // Refresca la lista de productos
+},
+
+
+
     saveProductChanges(updatedProduct) {
   const index = this.localProducts.findIndex((p) => p.product_id === updatedProduct.product_id);
-  
+
   if (index !== -1) {
     // Llamada a la API para actualizar el producto en la base de datos
     axios.put(`http://localhost:8000/api/products/${updatedProduct.product_id}`, updatedProduct)
       .then((response) => {
-        // Actualizamos el producto en la lista con la respuesta del servidor
-        this.localProducts[index] = response.data.product;
+        console.log('Producto actualizado:', response.data.product);
 
-        // Confirmación de la actualización
-        console.log('Producto actualizado en la base de datos:', response.data.product);
+        // Sincronizar los productos desde el backend
+        this.fetchProducts();
       })
       .catch((error) => {
         console.error('Error al actualizar el producto:', error);
@@ -138,6 +142,7 @@ export default {
 
   this.showEditModal = false;
 }
+
 
 
 ,
@@ -189,19 +194,23 @@ export default {
       }
     },
     async fetchProducts() {
-      try {
-        // Llamada a la API para obtener la lista de productos
-        const response = await axios.get('http://localhost:8000/api/products/store/1');
-        this.localProducts = response.data;
-      } catch (error) {
-        console.error('Error al obtener los productos:', error);
-      }
-    },
-    getImageUrl(product) {
-      // Asegurarse de que la URL de la imagen esté bien formada o use una imagen por defecto
-      console.log("URL de imagen del producto:", product.image);
-      return product.image ? product.image : 'default_image_path';
-    }
+  try {
+    // Llamada a la API para obtener la lista de productos
+    const response = await axios.get(`http://localhost:8000/api/products/store/${this.storeId}`);
+
+    this.localProducts = response.data;
+    console.log('Productos actualizados:', this.localProducts);
+  } catch (error) {
+    console.error('Error al obtener los productos:', error);
+  }
+}
+,
+getImageUrl(product) {
+  return product.image && product.image.startsWith('http')
+    ? product.image
+    : `${window.location.origin}/storage/${product.image}`;
+}
+,
     
   }
   
