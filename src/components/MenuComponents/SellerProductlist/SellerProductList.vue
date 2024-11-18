@@ -5,62 +5,45 @@
     <!-- Botón para agregar producto -->
     <button class="add-product-button" @click="openCreateModal">Agregar Producto</button>
 
-    <table class="product-table">
-      <thead>
-        <tr>
-          <th>ID</th> <!-- Añadir el ID del producto -->
-          <th>Imagen</th>
-          <th>Nombre del Producto</th>
-          <th>Categoría</th> <!-- Añadir la categoría -->
-          <th>Descripción</th> <!-- Añadir la descripción -->
-          <th>Stock</th> <!-- Añadir el stock -->
-          <th>Precio</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="product in localProducts" :key="product.product_id">
-          <td>{{ product.product_id }}</td> <!-- Mostrar el ID del producto -->
-          <td>
-            <!-- Mostrar la imagen del producto -->
-            <img :src="getImageUrl(product)" class="product-image" />
-          </td>
-          <td>{{ product.name }}</td>
-          <td>{{ product.category_name }}</td> <!-- Mostrar la categoría -->
-          <td>{{ product.description }}</td> <!-- Mostrar la descripción -->
-          <td>{{ product.stock }}</td> <!-- Mostrar el stock -->
-          <td>{{ formatCurrency(product.price) }}</td>
-          <td class="action-buttons">
-            <button class="edit-button" @click="openEditModal(product)">Editar</button>
-            <button class="delete-button" @click="confirmDelete(product.product_id)">Eliminar</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Tabla de productos -->
+    <div class="table-wrapper">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Descripción</th>
+            <th>Stock</th>
+            <th>Precio</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="product in localProducts" :key="product.product_id">
+            <td data-label="ID">{{ product.product_id }}</td>
+            <td data-label="Imagen">
+              <img :src="getImageUrl(product)" class="product-image" alt="Imagen del producto" />
+            </td>
+            <td data-label="Nombre">{{ product.name }}</td>
+            <td data-label="Categoría">{{ product.category_name }}</td>
+            <td data-label="Descripción">{{ product.description }}</td>
+            <td data-label="Stock">{{ product.stock }}</td>
+            <td data-label="Precio">{{ formatCurrency(product.price) }}</td>
+            <td data-label="Acciones" class="action-buttons">
+              <button class="edit-button" @click="openEditModal(product)">Editar</button>
+              <button class="delete-button" @click="confirmDelete(product.product_id)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <EditProductModal
-      v-if="showEditModal"
-      :product="selectedProduct"
-      @close="closeEditModal"
-      @save="saveProductChanges"
-    />
-
-    <!-- Modal para crear producto -->
-    <CreateProduct
-  v-if="showCreateModal"
-  :showModal="showCreateModal"
-  :store-id="storeId" 
-  @close-modal="closeCreateModal"
-  @create="addNewProduct"
-/>
-
-    <DeleteConfirmationModal
-      v-if="showDeleteModal"
-      :showModal="showDeleteModal"
-      :productId="deleteProductId"
-      @close="cancelDelete"
-      @confirm="deleteProduct"
-    />
+    <!-- Modales -->
+    <EditProductModal v-if="showEditModal" :product="selectedProduct" @close="closeEditModal" @save="saveProductChanges" />
+    <CreateProduct v-if="showCreateModal" :showModal="showCreateModal" :store-id="storeId" @close-modal="closeCreateModal" @create="addNewProduct" />
+    <DeleteConfirmationModal v-if="showDeleteModal" :showModal="showDeleteModal" :productId="deleteProductId" @close="cancelDelete" @confirm="deleteProduct" />
   </div>
 </template>
 
@@ -229,9 +212,11 @@ export default {
 .product-list-container {
   max-width: 900px;
   margin: 0 auto;
+  padding: 20px;
 }
+
 h2 {
-  text-align: left;
+  text-align: center;
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 20px;
@@ -246,35 +231,6 @@ h2 {
   border-radius: 4px;
   cursor: pointer;
   margin-bottom: 20px;
-}
-
-.product-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #f9f9f9;
-}
-.product-table th,
-.product-table td {
-  padding: 15px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-  vertical-align: middle;
-}
-.product-table th {
-  color: #555;
-  font-size: 16px;
-}
-.product-image {
-  width: auto; 
-  max-width: 200px; 
-  height: auto; 
-  max-height: 200px; 
-  object-fit: contain; 
-}
-
-.action-buttons {
-  text-align: left;
-  white-space: nowrap;
 }
 .edit-button,
 .delete-button {
@@ -293,48 +249,121 @@ h2 {
   background-color: #e74c3c;
   color: white;
 }
-
-.delete-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.add-product-button:hover {
+  background-color: #0077b6;
 }
 
-.delete-modal {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 400px;
+.table-wrapper {
+  overflow-x: auto; /* Permitir desplazamiento horizontal en pantallas pequeñas */
+}
+
+.product-table {
   width: 100%;
-  text-align: center;
+  border-collapse: collapse;
+  background-color: #f9f9f9;
 }
 
-.modal-buttons {
-  margin-top: 20px;
+.product-table th,
+.product-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  vertical-align: middle;
 }
 
-.cancel-button {
-  background-color: #ccc;
-  color: #333;
-  border: none;
-  padding: 10px 20px;
-  margin-right: 10px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.confirm-delete-button {
-  background-color: #e74c3c;
+.product-table th {
+  background-color: #0077b6;
   color: white;
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.product-table td {
+  font-size: 14px;
+}
+
+.product-table tr {
+  transition: background-color 0.3s;
+}
+
+.product-table tr:hover {
+  background-color: #e8f4fc;
+}
+
+.product-image {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border: 1px solid #ddd;
   border-radius: 4px;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .product-list-container {
+    padding: 10px;
+  }
+
+  .add-product-button {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  .product-table thead {
+    display: none;
+  }
+
+  .product-table tr {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+  }
+
+  .product-table td {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+
+  .product-table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  .product-table td[data-label="Imagen"] {
+    display: flex;
+    justify-content: center;
+  }
+
+  .product-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 20px;
+  }
+
+  .add-product-button {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .product-image {
+    width: 60px;
+    height: 60px;
+  }
 }
 </style>
