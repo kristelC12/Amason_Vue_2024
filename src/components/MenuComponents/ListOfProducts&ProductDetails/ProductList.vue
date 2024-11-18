@@ -32,7 +32,7 @@ export default {
   methods: {
     async fetchProductsByCategory(categoryId) {
       try {
-        const response = await axios.get(`http://localhost:8000/api/recommended/products/category/${categoryId}`);
+        const response = await axios.get(`http://localhost:8000/api/products/category/${categoryId}`);
         console.log(response.data);
         
         // Reestructurar el JSON recibido
