@@ -60,8 +60,8 @@
               <div class="form-group">
                 <label for="cardNumber">Número de tarjeta</label>
                 <div class="input-container">
-                  <input type="text" id="cardNumber" name="cardNumber" placeholder="Enter Card Number" v-model="user.cardNumber"
-                    pattern="\d{4}-\d{4}-\d{4}-\d{4}" />
+                  <input type="text" id="cardNumber" name="cardNumber" placeholder="Enter Card Number"
+                    v-model="user.cardNumber" maxlength="19" @input="formatCardNumber" />
                   <div class="payment-icons">
                     <i class="fa-brands fa-cc-mastercard fa-xl" style="color: #21246e"></i>
                     <i class="fa-brands fa-cc-visa fa-xl" style="color: #21246e"></i>
@@ -71,9 +71,9 @@
               </div>
             </div>
             <div class="form-group">
-              <label for="exp">Fecha de expiración</label>
-              <input type="text" id="exp" name="exp" placeholder="MM/YY" pattern="(0[1-9]|1[0-2])\/\d{2}" />
-            </div>
+    <label for="exp">Fecha de expiración</label>
+    <input type="text" id="exp" name="exp" placeholder="MM/YY" v-model="user.expDate" @input="formatExpDate" />
+  </div>
             <div class="form-group">
               <div class="tooltip-container">
                 <label for="cvv">CVV</label>
@@ -81,7 +81,7 @@
                 <div v-if="tooltipVisible" class="tooltip-text">
                   Los tres dígitos en la parte posterior de tu tarjeta
                 </div>
-                <input type="password" id="cvv" name="cvv" placeholder="***" pattern="\d{3}" />
+                <input type="password" id="cvv" name="cvv" placeholder="***" maxlength="3" />
               </div>
             </div>
           </div>
@@ -102,37 +102,48 @@
 
 <script>
 import api from '../../../services/api'
+import { mapActions } from 'vuex'
+
 
 export default {
   name: 'CheckoutComponent',
   data() {
-    return {
-      tooltipVisible: false, // Controla la visibilidad del tooltip
-      selectedMethod: 'card',
-      user: {
-        name: '',
-        phone: '',
-        country: '',
-        city: '',
-        address: '',
-        postal_code: '',
-        cardNumber: '',
-        paymentMethod: 'card'
-      },
-      paymentMethods: [
-        { name: 'card', icon: 'fa-cc-visa' },
-        { name: 'paypal', icon: 'fa-paypal' }
-      ]
-
-    }
-  },
+  return {
+    tooltipVisible: false,
+    selectedMethod: 'card', // Inicializa el valor seleccionado
+    user: {
+      name: '',
+      phone: '',
+      country: '',
+      city: '',
+      address: '',
+      postal_code: '',
+      cardNumber: '',
+      paymentMethod: 'card', // Valor inicial
+      expDate: ''
+    },
+    paymentMethods: [
+      { name: 'card', icon: 'fa-cc-visa' },
+      { name: 'paypal', icon: 'fa-paypal' }
+    ]
+  }
+ },
   methods: {
+    ...mapActions('cart', ['removeAllProductsFromCart']),
     // Mostrar y ocultar tooltip
     showTooltip() {
       this.tooltipVisible = true
     },
     hideTooltip() {
       this.tooltipVisible = false
+    },
+
+    formatExpDate() {
+      let expDate = this.user.expDate.replace(/\D/g, '');
+      if (expDate.length > 2) {
+        expDate = expDate.slice(0, 2) + '/' + expDate.slice(2, 4);
+      }
+      this.user.expDate = expDate;
     },
 
     selectPaymentMethod(method) {
@@ -185,20 +196,27 @@ export default {
       return true
     },
 
+    // Formatear número de tarjeta
+    formatCardNumber() {
+      this.user.cardNumber = this.user.cardNumber.replace(/\s+/g, '').replace(/[^0-9]/gi, '').replace(/(.{4})/g, '$1 ').trim();
+
+      this.$nextTick(() => {
+    document.getElementById('cardNumber').value = this.user.cardNumber;
+  });
+    },
+
     // Validar y completar la orden
     async completeOrder() {
-
-      
       if (this.validateShippingInfo() && this.validatePaymentInfo()) {
         const banderaInfo = await this.actualizarInformacionUsuario(this.user)
 
         if (banderaInfo) {
           if (window.confirm('¿Desea completar la compra?')) {
-            
             this.procesarOrden({
               paymentMethod: this.user.paymentMethod,
               cardNumber: this.user.cardNumber
             })
+            this.removeAllProductsFromCart()
             this.$router.push('/Menu')
           }
         }
@@ -207,12 +225,10 @@ export default {
 
     async procesarOrden(datosOrden) {
       try {
-        console.log(datosOrden)
         const response = await api.post('/order/process', datosOrden, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           },
-
         })
 
         if (response.status === 404) {
@@ -236,7 +252,6 @@ export default {
           alert('No se encontró información de envío')
         }
 
-        console.log(response)
       } catch (error) {
         console.error()
         return false
@@ -257,12 +272,14 @@ export default {
         console.error('Error al actualizar la información del usuario:', error)
         return false
       }
-
     }
-
   },
   mounted() {
-    this.obtenerInformacionUsuario()
+    this.obtenerInformacionUsuario(),
+
+    this.obtenerInformacionUsuario().then(() => {
+    this.user.paymentMethod = 'card';
+  });
   }
 }
 </script>
