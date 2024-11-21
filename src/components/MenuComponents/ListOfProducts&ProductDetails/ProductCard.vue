@@ -1,6 +1,9 @@
 <template>
   <div class="product-container">
-    <img :src="product.product_image" :alt="product.product_name" />
+    <img
+  :src="product.product_image ? product.product_image : 'https://via.placeholder.com/150'"
+  :alt="product.product_name"
+/>
     <h3>{{ product.product_name }}</h3>
     <div class="price-addCart">
       <p class="price">₡ {{ product.product_price.toFixed(2) }}</p>
@@ -65,7 +68,7 @@ export default {
 img{
   width: 100%;
   height: 200px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 8px;
 }
 

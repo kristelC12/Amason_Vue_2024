@@ -42,11 +42,18 @@
           <textarea id="description" v-model="product.description" rows="3" required></textarea>
         </div>
 
-        <!-- Links de Imágenes -->
-        <div class="form-group">
-          <label for="image_links">Links de Imágenes (separados por comas)</label>
-          <textarea id="image_links" v-model="imageLinksText" rows="3" placeholder="Ingresa los links de las imágenes, separados por comas"></textarea>
-        </div>
+      <!-- Campo para subir imágenes -->
+<div class="form-group">
+  <label for="images">Subir Imágenes</label>
+  <input
+    type="file"
+    id="images"
+    multiple
+    @change="handleFileChange"
+    accept="image/*"
+  />
+</div>
+
 
         <!-- Botones de acción -->
         <div class="form-actions">
@@ -59,16 +66,15 @@
 </template>
 
 <script>
-import { createProduct } from '../../../../api/auth'; // O la ruta correcta
+import axios from 'axios';
 
 export default {
   props: {
     showModal: {
       type: Boolean,
-      required: true, // Opción si es obligatorio
-    
-  },
-    storeId: { // Recibe el ID de la tienda
+      required: true,
+    },
+    storeId: {
       type: Number,
       required: true,
     },
@@ -77,70 +83,71 @@ export default {
     return {
       product: {
         name: '',
-        category_id: '',  // Este será el ID numérico de la categoría
+        category_id: '',
         price: '',
         stock: '',
         description: '',
-        id_store: this.storeId, // Asigna el ID de la tienda al producto
+        id_store: this.storeId,
       },
-      imageLinksText: '', // Aquí se almacenarán las URLs ingresadas por el usuario
-      
+      images: [],
     };
   },
   methods: {
     closeModal() {
-      this.$emit('close-modal'); // Emitir el evento para cerrar el modal
+      this.$emit('close-modal');
+    },
+    handleFileChange(event) {
+      this.images = Array.from(event.target.files); // Guardar imágenes seleccionadas
+      console.log('Imágenes seleccionadas:', this.images);
     },
     async handleSubmit() {
-  try {
-    // Convertimos el texto de los links de imágenes en un array
-    const imageLinks = (this.imageLinksText || '')
-      .split(',') // Separa los links por comas
-      .map((link) => link.trim()) // Remueve espacios innecesarios
-      .filter((link) => link); // Filtramos posibles valores vacíos
+      try {
+        const formData = new FormData();
 
-    // Agregamos los links al objeto de producto
-    const newProduct = {
-      ...this.product,
-      id_store: this.storeId, 
-      image_links: imageLinks, // Asignamos los links de imágenes
-      
-    };
+        // Agregar los datos del producto al FormData
+        Object.keys(this.product).forEach((key) => {
+          formData.append(key, this.product[key]);
+        });
 
-    console.log('Enviando nuevo producto:', newProduct);
+        // Agregar las imágenes al FormData
+        if (this.images.length > 0) {
+          this.images.forEach((image, index) => {
+            formData.append(`images[${index}]`, image);
+          });
+        }
 
-    // Llamar a la API para crear el producto
-    await createProduct(newProduct);
+        // Llamar a la API para crear el producto
+        const response = await axios.post(
+          'http://localhost:8000/api/products',
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
 
-    // Emitir evento para notificar al componente padre que el producto fue creado
-    this.$emit('product-created');
+        console.log('Producto creado con éxito:', response.data);
 
-    // Limpiar el formulario
-    this.product = {
-      name: '',
-      price: '',
-      stock: '',
-      category_id: '',
-      
-    };
-    this.imageLinksText = ''; // Limpiar el campo de links de imágenes
+        // Emitir evento al padre para actualizar la lista de productos
+        this.$emit('product-created', response.data);
 
-    // Cerrar el modal
-    this.closeModal();
-  } catch (error) {
-    console.error('Error al crear el producto:', error.message);
-  }
-},
-
-
-  },
-  watch: {
-    showModal(value) {
-      if (value) {
-        console.log(`Abriendo ventana de creación de producto para la tienda con ID: ${this.storeId}`);
+        // Limpiar el formulario y cerrar el modal
+        this.product = {
+          name: '',
+          category_id: '',
+          price: '',
+          stock: '',
+          description: '',
+          id_store: this.storeId,
+        };
+        this.images = [];
+        this.closeModal();
+      } catch (error) {
+        console.error('Error al crear el producto:', error.response?.data || error.message);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
