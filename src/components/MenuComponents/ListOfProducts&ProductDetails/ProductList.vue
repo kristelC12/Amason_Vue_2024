@@ -35,6 +35,27 @@ export default {
     }
     
   },
+  watch: {
+    '$route.query.name': {
+      immediate: true,
+      handler(newName) {
+        if (newName) {
+          this.title = `Resultados de búsqueda para: "${newName}"`;
+          this.fetchProductsByName(newName);
+        }
+      },
+    },
+    '$route.query.categoryId': {
+      immediate: true,
+      handler(newCategoryId) {
+        if (newCategoryId) {
+          const title = this.$route.query.title || '';
+          this.title = title;
+          this.fetchProductsByCategory(newCategoryId);
+        }
+      },
+    },
+  },
   methods: {
     async fetchProductsByCategory(categoryId) {
       try {
