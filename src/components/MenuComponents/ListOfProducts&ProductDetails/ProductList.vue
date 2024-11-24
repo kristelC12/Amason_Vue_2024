@@ -24,18 +24,23 @@ export default {
   async created() {
     const categoryId = this.$route.query.categoryId;
     const title = this.$route.query.title;
+    const name = this.$route.query.name; // Obtener el parámetro de búsqueda por nombre
+
     if (categoryId) {
       this.title = title;
-      await this.fetchProductsByCategory(categoryId, title);
+      await this.fetchProductsByCategory(categoryId);
+    } else if (name) {
+      this.title = `Resultados de búsqueda para: "${name}"`;
+      await this.fetchProductsByName(name); // Llamar al método de búsqueda por nombre
     }
+    
   },
   methods: {
-        async fetchProductsByCategory(categoryId) {
+    async fetchProductsByCategory(categoryId) {
       try {
         const response = await axios.get(`http://localhost:8000/api/products/category/${categoryId}`);
         console.log(response.data);
 
-        
         // Reestructurar el JSON recibido
         this.products = response.data.map(product => ({
           product_id: product.product_id,
@@ -48,11 +53,31 @@ export default {
       } catch (error) {
         console.error("Error al cargar productos por categoría:", error);
       }
-    }
-  }
+    },
+    async fetchProductsByName(name) {
+      try {
+        const response = await axios.get(`http://localhost:8000/api/products/search`, {
+          params: { name },
+        });
+        console.log(response.data);
 
+        // Reestructurar el JSON recibido
+        this.products = response.data.map(product => ({
+          product_id: product.product_id,
+          product_description: product.description,
+          product_name: product.name,
+          product_price: product.price,
+          product_stock: product.stock,
+          product_image: product.image
+        }));
+      } catch (error) {
+        console.error("Error al cargar productos por nombre:", error);
+      }
+    },
+  },
 };
 </script>
+
 
 
 <style scoped>

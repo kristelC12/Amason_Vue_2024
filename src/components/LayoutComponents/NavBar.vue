@@ -8,13 +8,25 @@
         style="width: 128px; height: auto"
       />
     </router-link>
-    <div class="search-container">
-      <input type="text" placeholder="Buscar artículo" aria-label="Buscar" />
-      <button type="button" aria-label="Buscar">
-        <i class="fas fa-search" aria-hidden="true"></i>
-      </button>
-    </div>
 
+    
+    <div class="search-container">
+  <input
+    type="text"
+    placeholder="Buscar artículo"
+    aria-label="Buscar"
+    v-model="searchQuery"
+    @keyup.enter="handleSearch"
+  />
+  <button
+  type="button"
+  aria-label="Buscar"
+  @click.prevent="handleSearch"
+>
+  <i class="fas fa-search" aria-hidden="true"></i>
+</button>
+
+</div>
     <ul>
       <li>
         <a href="#">
@@ -86,6 +98,12 @@ import PopUpCart from '../CartComponents/PopUpCart.vue'
 import { logoutUser } from '../../../api/auth'
 
 export default {
+  data() {
+    return {
+      searchQuery: '', // Campo de búsqueda
+      selectedCategory: null, // Para la categoría abierta (si es necesario)
+    };
+  },
   components: {
     PopUpCart
   },
@@ -107,9 +125,22 @@ export default {
     logout() {
       logoutUser() // Llamada a la función que elimina el token y redirige
       this.$router.push('/login') // Redirige al login después del logout
-    }
+    },
+  handleSearch() {
+  console.log("handleSearch ejecutado");
+  if (!this.searchQuery.trim()) {
+    alert("Por favor, ingrese un término de búsqueda.");
+    return;
   }
-}
+  this.$router.push({
+    name: "ProductList",
+    query: { name: this.searchQuery.trim() },
+  });
+
+  },
+  },
+
+  };
 </script>
 
 <style scoped>
@@ -159,6 +190,7 @@ nav {
   cursor: pointer;
   line-height: 2rem;
   border-radius: 0 5px 5px 0;
+  
 }
 
 .line-1 {
