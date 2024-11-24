@@ -318,7 +318,7 @@ export default {
         console.log(localStorage.getItem('order_id'));
         // Lógica para cancelar la orden
         await api.post('/order/cancel',
-          { order_id: localStorage.getItem('order_id') },
+          { order_id: localStorage.getItem('order_id'), user_id: localStorage.getItem('userId')},
           {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           }
