@@ -30,10 +30,11 @@ export default {
     }
   },
   methods: {
-    async fetchProductsByCategory(categoryId) {
+        async fetchProductsByCategory(categoryId) {
       try {
-        const response = await axios.get(`http://localhost:8000/api/recommended/products/category/${categoryId}`);
+        const response = await axios.get(`http://localhost:8000/api/products/category/${categoryId}`);
         console.log(response.data);
+
         
         // Reestructurar el JSON recibido
         this.products = response.data.map(product => ({
@@ -44,8 +45,6 @@ export default {
           product_stock: product.stock,
           product_image: product.image
         }));
-
-        console.log(this.products.image_path);
       } catch (error) {
         console.error("Error al cargar productos por categoría:", error);
       }
