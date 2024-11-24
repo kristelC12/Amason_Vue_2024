@@ -46,24 +46,19 @@ export default {
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       )
 
-       await api.post('/order/create',
+       const orderResponse = await api.post('/order/create',
         {
           'user_id': response.data.user,
           'status': 1
         },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       )
-
+      
+      localStorage.setItem('order_id', orderResponse.data.order_id);
       this.$router.push('/Checkout')
       } else {
         alert('No hay productos en el carrito')
       }
-
-
-      
-
-
-   
 
     }
   }
