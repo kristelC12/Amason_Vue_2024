@@ -3,7 +3,17 @@
 
     <h2>{{ title }}</h2>
     <div class="product-list-cotainer">
-      <ProductCard v-for="product in products" :key="product.product_id" :product="product" />
+       <!-- Mostrar mensaje después de un tiempo si no hay productos -->
+    <p v-if="showNoProductsMessage && products.length === 0">
+      No hay productos en esta categoría.
+    </p>
+
+    <!-- Renderizar productos si los hay -->
+    <ProductCard
+      v-for="product in products"
+      :key="product.product_id"
+      :product="product"
+    />
     </div>
 
   </div>
@@ -19,9 +29,16 @@ export default {
     return {
       products: [],
       title: '',
+      showNoProductsMessage: false, // Controla si mostrar el mensaje
     };
   },
   async created() {
+      // Retraso antes de mostrar el mensaje
+      setTimeout(() => {
+      if (this.products.length === 0) {
+        this.showNoProductsMessage = true;
+      }
+    }, 1000); // Tiempo de espera (3 segundos en este caso)
     const categoryId = this.$route.query.categoryId;
     const title = this.$route.query.title;
     if (categoryId) {
@@ -32,7 +49,7 @@ export default {
   methods: {
         async fetchProductsByCategory(categoryId) {
       try {
-        const response = await axios.get(`http://localhost:8000/api/products/category/${categoryId}`);
+        const response = await axios.get(`http://localhost:8000/api/recommended/products/category/${categoryId}`);
         console.log(response.data);
 
         
@@ -43,7 +60,7 @@ export default {
           product_name: product.name,
           product_price: product.price,
           product_stock: product.stock,
-          product_image: product.image
+          product_image: product.image_path,
         }));
       } catch (error) {
         console.error("Error al cargar productos por categoría:", error);

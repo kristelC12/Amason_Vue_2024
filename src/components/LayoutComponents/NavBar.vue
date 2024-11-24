@@ -44,6 +44,12 @@
           <div class="line-2">sesión</div>
         </a>
       </li>
+      <li>
+        <router-link to="/trending">
+          <a class="trending" href="">Trending</a>
+        </router-link>
+       
+      </li>
     </ul>
 
     <div class="bottom-nav">
@@ -117,13 +123,16 @@ nav {
   background-color: #4babe2;
   color: white;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 35px 20px;
   position: sticky;
   top: 0;
   width: 100%;
   z-index: 1000;
+}
+.trending{
+  color: white;
+  font-weight: bold;
 }
 
 .logo-button {
@@ -136,7 +145,7 @@ nav {
 .search-container {
   display: flex;
   align-items: center;
-  width: 100%;
+  width: 20rem;
   justify-content: center;
   margin: 0 10px;
 }

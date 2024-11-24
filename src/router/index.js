@@ -15,6 +15,7 @@ import AdminTicket from '@/components/TicketsComponents/AdminTicket.vue';
 import CheckOut from '@/components/CartComponents/CheckOut.vue';
 import ReviewRatingsView from '@/views/LoginViews/ReviewRatingsView.vue';
 import WriteReviewView from '@/views/LoginViews/WriteReviewView.vue';
+import TrendingList from '@/components/MenuComponents/ListOfProducts&ProductDetails/TrendingList.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -117,6 +118,12 @@ const router = createRouter({
           component: ProductList
         },
         {
+          path: '/trending',
+          name: 'trending',
+          component: TrendingList
+        },
+       
+        {
           path: '/Menu',
           name: 'Menu',
           component: MenuView
@@ -167,6 +174,7 @@ const router = createRouter({
       component: ReportComponent,
       props: true,
     },
+   
   
   ]
 })
