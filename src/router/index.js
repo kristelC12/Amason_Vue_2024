@@ -20,8 +20,8 @@ import TrendingList from '@/components/MenuComponents/ListOfProducts&ProductDeta
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-
-
+    
+    
     {
       path: '/tickets',
       name: 'Tickets',
