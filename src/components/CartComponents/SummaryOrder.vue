@@ -11,9 +11,7 @@
       </div>
       <div class="gray-line"></div>
     </div>
-    <router-link to="/CheckOut">
       <button class="btn" @click="createOrder">Check Out</button>
-    </router-link>
     <div class="payments">
       <div class="method">
         <i class="fa-brands fa-cc-visa fa-2xl" style="color: #21246e"></i>
@@ -43,20 +41,24 @@ export default {
 
   methods: {
     async createOrder() {
-      const response = await api.get('/user',
+      if (this.cartItems.length > 0) {
+        const response = await api.get('/user',
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       )
 
-      
-      const responseOrderCreate = await api.post('/order/create',
+       const orderResponse = await api.post('/order/create',
         {
           'user_id': response.data.user,
           'status': 1
         },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       )
-
-      console.log(responseOrderCreate)
+      
+      localStorage.setItem('order_id', orderResponse.data.order_id);
+      this.$router.push('/Checkout')
+      } else {
+        alert('No hay productos en el carrito')
+      }
 
     }
   }

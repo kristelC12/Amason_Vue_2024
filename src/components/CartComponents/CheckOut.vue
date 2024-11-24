@@ -13,7 +13,7 @@
           <div class="form-group">
             <label for="shippingPhoN">Número de Teléfono</label>
             <input type="text" id="shippingPhoN" name="shippingPhoN" placeholder="Ingrese su número de teléfono"
-              v-model="user.phone" />
+              v-model="user.phone_number" @input="formatPhoneNumber" />
           </div>
           <div class="form-group">
             <label for="shippingAddress">Dirección</label>
@@ -60,8 +60,8 @@
               <div class="form-group">
                 <label for="cardNumber">Número de tarjeta</label>
                 <div class="input-container">
-                  <input type="text" id="cardNumber" name="cardNumber" placeholder="Enter Card Number" v-model="user.cardNumber"
-                    pattern="\d{4}-\d{4}-\d{4}-\d{4}" />
+                  <input type="text" id="cardNumber" name="cardNumber" placeholder="Enter Card Number"
+                    v-model="user.cardNumber" maxlength="19" @input="formatCardNumber" />
                   <div class="payment-icons">
                     <i class="fa-brands fa-cc-mastercard fa-xl" style="color: #21246e"></i>
                     <i class="fa-brands fa-cc-visa fa-xl" style="color: #21246e"></i>
@@ -72,7 +72,8 @@
             </div>
             <div class="form-group">
               <label for="exp">Fecha de expiración</label>
-              <input type="text" id="exp" name="exp" placeholder="MM/YY" pattern="(0[1-9]|1[0-2])\/\d{2}" />
+              <input type="text" id="exp" name="exp" placeholder="MM/YY" v-model="user.expDate"
+                @input="formatExpDate" />
             </div>
             <div class="form-group">
               <div class="tooltip-container">
@@ -81,7 +82,7 @@
                 <div v-if="tooltipVisible" class="tooltip-text">
                   Los tres dígitos en la parte posterior de tu tarjeta
                 </div>
-                <input type="password" id="cvv" name="cvv" placeholder="***" pattern="\d{3}" />
+                <input type="password" id="cvv" name="cvv" placeholder="***" maxlength="3" />
               </div>
             </div>
           </div>
@@ -102,13 +103,16 @@
 
 <script>
 import api from '../../../services/api'
+import { mapActions } from 'vuex'
+
 
 export default {
   name: 'CheckoutComponent',
   data() {
     return {
-      tooltipVisible: false, // Controla la visibilidad del tooltip
-      selectedMethod: 'card',
+      tooltipVisible: false,
+      selectedMethod: 'card', // Inicializa el valor seleccionado
+      order_id: '',
       user: {
         name: '',
         phone: '',
@@ -116,23 +120,42 @@ export default {
         city: '',
         address: '',
         postal_code: '',
+        phone_number: '',
         cardNumber: '',
-        paymentMethod: 'card'
+        paymentMethod: 'card', // Valor inicial
+        expDate: ''
       },
       paymentMethods: [
         { name: 'card', icon: 'fa-cc-visa' },
         { name: 'paypal', icon: 'fa-paypal' }
       ]
-
     }
   },
   methods: {
+    ...mapActions('cart', ['removeAllProductsFromCart']),
     // Mostrar y ocultar tooltip
     showTooltip() {
       this.tooltipVisible = true
     },
     hideTooltip() {
       this.tooltipVisible = false
+    },
+
+    formatExpDate() {
+      let expDate = this.user.expDate.replace(/\D/g, '');
+      if (expDate.length > 2) {
+        expDate = expDate.slice(0, 2) + '/' + expDate.slice(2, 4);
+      }
+      this.user.expDate = expDate;
+    },
+
+
+    formatPhoneNumber() {
+      let phoneNumber = this.user.phone_number.replace(/\D/g, '');
+      if (phoneNumber.length > 4) {
+        phoneNumber = phoneNumber.slice(0, 4) + ' ' + phoneNumber.slice(4, 8);
+      }
+      this.user.phone_number = phoneNumber;
     },
 
     selectPaymentMethod(method) {
@@ -159,7 +182,7 @@ export default {
         alert('Por favor, complete toda la información de envío.')
         return false
       }
-      if (!/^\d{8,15}$/.test(shippingPhoN)) {
+      if (!/^\d{4}\s?\d{4}$/.test(shippingPhoN)) {
         alert('Número de teléfono inválido.')
         return false
       }
@@ -185,20 +208,47 @@ export default {
       return true
     },
 
+    validateExpDate() {
+      const expDate = document.getElementById('exp').value;
+
+      const [month, year] = expDate.split('/').map(Number);
+      if (month < 1 || month > 12) {
+        alert('Fecha de expiración inválida.');
+        return false;
+      }
+
+      const currentYear = new Date().getFullYear() % 100;
+      const currentMonth = new Date().getMonth() + 1;
+
+      if (year < currentYear || (year === currentYear && month < currentMonth)) {
+        alert('La tarjeta está expirada.');
+        return false;
+      }
+
+      return true;
+    },
+
+    // Formatear número de tarjeta
+    formatCardNumber() {
+      this.user.cardNumber = this.user.cardNumber.replace(/\s+/g, '').replace(/[^0-9]/gi, '').replace(/(.{4})/g, '$1 ').trim();
+
+      this.$nextTick(() => {
+        document.getElementById('cardNumber').value = this.user.cardNumber;
+      });
+    },
+
     // Validar y completar la orden
     async completeOrder() {
-
-      
-      if (this.validateShippingInfo() && this.validatePaymentInfo()) {
+      if (this.validateShippingInfo() && this.validatePaymentInfo() && this.validateExpDate()) {
         const banderaInfo = await this.actualizarInformacionUsuario(this.user)
 
         if (banderaInfo) {
           if (window.confirm('¿Desea completar la compra?')) {
-            
             this.procesarOrden({
               paymentMethod: this.user.paymentMethod,
               cardNumber: this.user.cardNumber
             })
+            this.removeAllProductsFromCart()
             this.$router.push('/Menu')
           }
         }
@@ -207,12 +257,10 @@ export default {
 
     async procesarOrden(datosOrden) {
       try {
-        console.log(datosOrden)
         const response = await api.post('/order/process', datosOrden, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           },
-
         })
 
         if (response.status === 404) {
@@ -226,44 +274,92 @@ export default {
 
     async obtenerInformacionUsuario() {
       try {
-        const response = await api.get('/deliveryInformation',
-          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-        )
+        const response = await api.get('/deliveryInformation', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+
         if (response.status === 200) {
-          this.user = response.data
-
-        } else if (response.status === 400) {
-          alert('No se encontró información de envío')
+          this.user = response.data;
         }
-
-        console.log(response)
       } catch (error) {
-        console.error()
-        return false
+        if (error.response && error.response.status === 404) {
+          alert('No se encontró información de envío.');
+        }
+        return false;
       }
     },
 
+
     async actualizarInformacionUsuario(user) {
       try {
-        const response = await api.put('/deliveryInformation', user,
+        await api.put('/deliveryInformation', user,
           { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
         )
 
-        if (response.status === 200) {
-          return true
-        }
+        return true;
 
       } catch (error) {
         console.error('Error al actualizar la información del usuario:', error)
-        return false
+
+      }
+    },
+
+    async cancelarOrden() {
+      try {
+        // Lógica para cancelar la orden
+        await api.post('/order/cancel',
+           { order_id: localStorage.getItem('order_id') },
+          {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          }
+        );
+        console.log('Orden cancelada exitosamente.');
+      } catch (error) {
+        console.error('Error al cancelar la orden:', error);
+      }
+    },
+    cancelarOrdenSync() {
+      const orderId = localStorage.getItem('order_id');
+      const token = localStorage.getItem('token');
+
+      if (!orderId || !token) {
+        console.warn('No hay información de orden o token disponible.');
+        return;
       }
 
-    }
+      // Usar sendBeacon para enviar la cancelación de manera síncrona
+      const url = 'http://localhost:8000/api/order/cancel';
+      const payload = JSON.stringify({ order_id: orderId, user_id: localStorage.getItem('userId') });
+      const blob = new Blob([payload], { type: 'application/json' });
 
+      const siwi = navigator.sendBeacon(url, blob);
+      if (siwi) {
+        console.log('Orden cancelada con sendBeacon.');
+      } else {
+        console.error('Error al cancelar la orden con sendBeacon.');
+    }
+  }
   },
   mounted() {
-    this.obtenerInformacionUsuario()
+    // Lógica de inicialización
+    this.obtenerInformacionUsuario().then(() => {
+      this.user.paymentMethod = 'card';
+    });
+
+    this.order_id = localStorage.getItem('order_id');
+
+    // Agregar listener para beforeunload (cerrar navegador o pestaña)
+    window.addEventListener('beforeunload', this.cancelarOrdenSync);
+  },
+
+  beforeUnmount() {
+    // Remover el listener para evitar fugas de memoria
+    window.removeEventListener('beforeunload', this.cancelarOrdenSync);
+
+    // Cancelar la orden explícitamente al desmontar el componente
+    this.cancelarOrden();
   }
+
 }
 </script>
 
@@ -495,6 +591,7 @@ textarea {
   -webkit-transform: translateY(-1px);
   transform: translateY(-1px);
   background-color: #f0ba47;
+  cursor: pointer;
 }
 
 /* Responsivo */
