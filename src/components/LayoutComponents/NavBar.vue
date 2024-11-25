@@ -17,10 +17,10 @@
 
     <ul>
       <li>
-        <a href="#">
-          <div class="line-1">Hola, usuario</div>
-          <div class="line-2">Cuenta y listas</div>
-        </a>
+        <router-link to="/Orders">
+          <div class="line-1">Mis</div>
+          <div class="line-2">Pedidos</div>
+        </router-link>
       </li>
       <!-- Opción "Ver Tickets" para admin -->
       <li v-if="isAdminOrUser">

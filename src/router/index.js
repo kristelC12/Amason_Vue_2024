@@ -15,6 +15,7 @@ import AdminTicket from '@/components/TicketsComponents/AdminTicket.vue';
 import CheckOut from '@/components/CartComponents/CheckOut.vue';
 import ReviewRatingsView from '@/views/LoginViews/ReviewRatingsView.vue';
 import WriteReviewView from '@/views/LoginViews/WriteReviewView.vue';
+import OrdersList from '@/components/OrderComponents/OrdersList.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -52,8 +53,8 @@ const router = createRouter({
             component: CartView
           },
           {
-            path: '/CheckOut',
-            name: 'CheckOut',
+            path: '/Checkout',
+            name: 'Checkout',
             component: CheckOut
           },
           {
@@ -86,6 +87,11 @@ const router = createRouter({
             path: '/reviewsrating',
             name: 'ReviewsRating',
             component: ReviewRatingsView,
+          },
+          {
+            path: '/orders',
+            name: 'OrdersList',
+            component: OrdersList,
           }
         ],
         
