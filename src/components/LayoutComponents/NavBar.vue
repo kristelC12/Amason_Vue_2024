@@ -8,12 +8,36 @@
         style="width: 128px; height: auto"
       />
     </router-link>
+
+    
     <div class="search-container">
-      <input type="text" placeholder="Buscar artículo" aria-label="Buscar" />
-      <button type="button" aria-label="Buscar">
-        <i class="fas fa-search" aria-hidden="true"></i>
-      </button>
+  <input
+    type="text"
+    placeholder="Buscar artículo"
+    aria-label="Buscar"
+    v-model="searchQuery"
+    @keyup.enter="handleSearch"
+  />
+  <button
+  type="button"
+  aria-label="Buscar"
+  @click.prevent="handleSearch"
+>
+  <i class="fas fa-search" aria-hidden="true"></i>
+</button>
+
+</div>
+
+<!-- Combobox de categorías -->
+<div class="category-dropdown">
+      <select v-model="selectedCategory" @change="filterByCategory">
+        <option disabled value="">Selecciona una categoría</option>
+        <option v-for="category in categories" :key="category.id" :value="category.id">
+          {{ category.name }}
+        </option>
+      </select>
     </div>
+
 
     <ul>
       <li>
@@ -43,6 +67,12 @@
           <div class="line-1">Cerrar</div>
           <div class="line-2">sesión</div>
         </a>
+      </li>
+      <li>
+        <router-link to="/trending">
+          <a class="trending" href="">Trending</a>
+        </router-link>
+       
       </li>
     </ul>
 
@@ -82,20 +112,71 @@
 </template>
 
 <script>
-import PopUpCart from '../CartComponents/PopUpCart.vue'
-import { logoutUser } from '../../../api/auth'
+import PopUpCart from '../CartComponents/PopUpCart.vue';
+import { logoutUser } from '../../../api/auth';
+import axios from 'axios';
 
 export default {
+  data() {
+    return {
+      searchQuery: '', // Campo de búsqueda
+      selectedCategory: null, // Para la categoría abierta (si es necesario)
+      categories: [], // Lista de categorías
+    };
+  },
   components: {
-    PopUpCart
+    PopUpCart,
   },
   computed: {
     isAdminOrUser() {
       const role = localStorage.getItem('userRole');
       return role && (role.includes('admin') || role.includes('user'));
-    }
+    },
+  },
+  watch: {
+  '$route.query.name': {
+    handler(newQuery) {
+      console.log(`Buscando productos con el término: ${newQuery}`);
+      this.fetchProducts(newQuery); // Llama al método de búsqueda con el nuevo término
+    },
+    immediate: true, // Ejecuta el handler al montar el componente
+  },
+},
+async created() {
+    await this.fetchCategories(); // Cargar categorías al montar el componente
   },
   methods: {
+
+    async fetchCategories() {
+      try {
+        const response = await axios.get('http://localhost:8000/api/categories');
+        this.categories = response.data; // Suponiendo que devuelve un array de categorías
+      } catch (error) {
+        console.error('Error al cargar categorías:', error);
+      }
+    },
+
+    async filterByCategory() {
+      if (this.selectedCategory) {
+        this.$router.push({
+          name: 'ProductList',
+          query: { categoryId: this.selectedCategory },
+        });
+      }
+    },
+    
+    async fetchProducts(query) {
+  try {
+    const response = await axios.get('http://localhost:8000/api/products/search', {
+      params: { name: query },
+    });
+    this.products = response.data; // Actualiza la lista de productos
+  } catch (error) {
+    console.error('Error al buscar productos:', error);
+    this.products = []; // Limpia la lista si ocurre un error
+  }
+}
+,
     goToTickets() {
       const role = localStorage.getItem('userRole');
       if (role && role.includes('admin')) {
@@ -105,11 +186,27 @@ export default {
       }
     },
     logout() {
-      logoutUser() // Llamada a la función que elimina el token y redirige
-      this.$router.push('/login') // Redirige al login después del logout
-    }
+      logoutUser(); // Llamada a la función que elimina el token y redirige
+      this.$router.push('/login'); // Redirige al login después del logout
+    },
+    handleSearch() {
+  console.log('handleSearch ejecutado');
+  if (!this.searchQuery.trim()) {
+    alert('Por favor, ingrese un término de búsqueda.');
+    return;
   }
-}
+
+  this.$router.push({
+    name: 'ProductList', // Nombre correcto de la ruta
+    query: { name: this.searchQuery.trim() },
+  }).catch(err => {
+    if (err.name !== 'NavigationDuplicated') {
+      console.error(err);
+    }
+  });
+},
+  }
+};
 </script>
 
 <style scoped>
@@ -117,7 +214,6 @@ nav {
   background-color: #4babe2;
   color: white;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 35px 20px;
   position: sticky;
@@ -125,7 +221,29 @@ nav {
   width: 100%;
   z-index: 1000;
 }
+.trending{
+  color: white;
+  font-weight: bold;
+/* Estilo del combobox */
+.category-dropdown {
+  margin-left: 20px;
+}
 
+.category-dropdown select {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  color: #333;
+  background-color: #f9f9f9;
+  outline: none;
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+}
+
+.category-dropdown select:focus {
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
 .logo-button {
   background: none;
   border: none;
@@ -136,7 +254,7 @@ nav {
 .search-container {
   display: flex;
   align-items: center;
-  width: 100%;
+  width: 20rem;
   justify-content: center;
   margin: 0 10px;
 }
@@ -159,6 +277,7 @@ nav {
   cursor: pointer;
   line-height: 2rem;
   border-radius: 0 5px 5px 0;
+  
 }
 
 .line-1 {

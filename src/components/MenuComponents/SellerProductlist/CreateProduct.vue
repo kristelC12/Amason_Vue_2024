@@ -42,11 +42,18 @@
           <textarea id="description" v-model="product.description" rows="3" required></textarea>
         </div>
 
-        <!-- Links de Imágenes -->
-        <div class="form-group">
-          <label for="image_links">Links de Imágenes (separados por comas)</label>
-          <textarea id="image_links" v-model="imageLinksText" rows="3" placeholder="Ingresa los links de las imágenes, separados por comas"></textarea>
-        </div>
+      <!-- Campo para subir imágenes -->
+<div class="form-group">
+  <label for="images">Subir Imágenes</label>
+  <input
+    type="file"
+    id="images"
+    multiple
+    @change="handleFileChange"
+    accept="image/*"
+  />
+</div>
+
 
         <!-- Botones de acción -->
         <div class="form-actions">
@@ -59,73 +66,87 @@
 </template>
 
 <script>
-import { createProduct } from '../../../../api/auth'; // O la ruta correcta
+import axios from 'axios';
 
 export default {
   props: {
     showModal: {
       type: Boolean,
-      required: true, // Opción si es obligatorio
-    }
+      required: true,
+    },
+    storeId: {
+      type: Number,
+      required: true,
+    },
   },
   data() {
     return {
       product: {
         name: '',
-        category_id: '',  // Este será el ID numérico de la categoría
+        category_id: '',
         price: '',
         stock: '',
         description: '',
-        id_store: 1 // Asignar directamente aquí el ID de la tienda
+        id_store: this.storeId,
       },
-      imageLinksText: '', // Aquí se almacenarán las URLs ingresadas por el usuario
-      
+      images: [],
     };
   },
   methods: {
     closeModal() {
-      this.$emit('close-modal'); // Emitir el evento para cerrar el modal
+      this.$emit('close-modal');
+    },
+    handleFileChange(event) {
+      this.images = Array.from(event.target.files); // Guardar imágenes seleccionadas
+      console.log('Imágenes seleccionadas:', this.images);
     },
     async handleSubmit() {
-  try {
-    // Convertimos el texto de los links de imágenes en un array
-    const imageLinks = (this.imageLinksText || '')
-      .split(',') // Separa los links por comas
-      .map((link) => link.trim()) // Remueve espacios innecesarios
-      .filter((link) => link); // Filtramos posibles valores vacíos
+      try {
+        const formData = new FormData();
 
-    // Agregamos los links al objeto de producto
-    const newProduct = {
-      ...this.product,
-      image_links: imageLinks, // Asignamos los links de imágenes
-    };
+        // Agregar los datos del producto al FormData
+        Object.keys(this.product).forEach((key) => {
+          formData.append(key, this.product[key]);
+        });
 
-    console.log('Enviando nuevo producto:', newProduct);
+        // Agregar las imágenes al FormData
+        if (this.images.length > 0) {
+          this.images.forEach((image, index) => {
+            formData.append(`images[${index}]`, image);
+          });
+        }
 
-    // Llamar a la API para crear el producto
-    await createProduct(newProduct);
+        // Llamar a la API para crear el producto
+        const response = await axios.post(
+          'http://localhost:8000/api/products',
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
 
-    // Emitir evento para notificar al componente padre que el producto fue creado
-    this.$emit('product-created');
+        console.log('Producto creado con éxito:', response.data);
 
-    // Limpiar el formulario
-    this.product = {
-      name: '',
-      price: '',
-      stock: '',
-      category_id: '',
-      id_store: 1,
-    };
-    this.imageLinksText = ''; // Limpiar el campo de links de imágenes
+        // Emitir evento al padre para actualizar la lista de productos
+        this.$emit('product-created', response.data);
 
-    // Cerrar el modal
-    this.closeModal();
-  } catch (error) {
-    console.error('Error al crear el producto:', error.message);
-  }
-},
-
-
+        // Limpiar el formulario y cerrar el modal
+        this.product = {
+          name: '',
+          category_id: '',
+          price: '',
+          stock: '',
+          description: '',
+          id_store: this.storeId,
+        };
+        this.images = [];
+        this.closeModal();
+      } catch (error) {
+        console.error('Error al crear el producto:', error.response?.data || error.message);
+      }
+    },
   },
 };
 </script>
@@ -141,15 +162,21 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 10px; /* Espacio interno para pantallas pequeñas */
+  box-sizing: border-box;
+  overflow-y: auto; /* Permite desplazamiento en caso de contenido largo */
 }
 
 .modal-content {
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
-  width: 350px;
+  width: 100%; /* Ancho completo para pantallas pequeñas */
+  max-width: 500px; /* Ancho máximo en pantallas grandes */
+  max-height: 90vh; /* Limitar altura al 90% de la ventana */
   position: relative;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  overflow-y: auto; /* Desplazamiento interno si el contenido supera el tamaño */
 }
 
 .close {
@@ -191,23 +218,51 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
+  flex-wrap: wrap; /* Permitir ajuste en pantallas pequeñas */
+}
+
+.cancel-button,
+.save-button {
+  flex: 1;
+  margin: 5px;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
 }
 
 .cancel-button {
   background-color: #e74c3c;
   color: #f0f0f0;
   border: 1px solid #e74c3c;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .save-button {
   background-color: #0ea5e9;
   color: white;
-  padding: 10px 20px;
   border: none;
-  border-radius: 4px;
-  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .modal-title {
+    font-size: 18px;
+  }
+
+  .form-group label {
+    font-size: 14px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .cancel-button,
+  .save-button {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
 }
 </style>
