@@ -117,9 +117,28 @@ export default {
     removeVariant(index) {
       this.variants.splice(index, 1);
     },
-    removeVariantFromView(index) {
-      this.viewVariants.splice(index, 1); // Elimina de la lista cargada
-    },
+
+    async removeVariantFromView(index) {
+  const variantToDelete = this.viewVariants[index];
+  try {
+    await axios.delete(
+      `http://localhost:8000/api/products/${this.productId}/variation`,
+      {
+        data: {
+          type: variantToDelete.type, 
+        },
+      }
+    );
+
+    // Si la eliminación es exitosa, eliminar de la vista
+    this.viewVariants.splice(index, 1);
+    console.log("Variante eliminada con éxito");
+  } catch (error) {
+    console.error("Error al eliminar la variante:", error.response?.data || error.message);
+    alert("Hubo un problema al eliminar la variante.");
+  }
+},
+
     async loadVariants() {
       this.loadingVariants = true; // Mostrar mensaje de carga
       try {
@@ -140,6 +159,7 @@ export default {
         this.loadingVariants = false; // Ocultar mensaje de carga
       }
     },
+    
     async saveVariants() {
   try {
     // Este es el cambio clave
