@@ -113,6 +113,7 @@ export default {
       tooltipVisible: false,
       selectedMethod: 'card', // Inicializa el valor seleccionado
       order_id: '',
+      orderCompleted: false,
       user: {
         name: '',
         phone: '',
@@ -244,12 +245,18 @@ export default {
 
         if (banderaInfo) {
           if (window.confirm('¿Desea completar la compra?')) {
-            this.procesarOrden({
+            const procesado = await this.procesarOrden({
               paymentMethod: this.user.paymentMethod,
               cardNumber: this.user.cardNumber
             })
-            this.removeAllProductsFromCart()
-            this.$router.push('/Menu')
+            if (procesado && procesado.status === 400) {
+              alert(procesado.data.message)
+            } else {
+              this.removeAllProductsFromCart()
+              this.orderCompleted = true;
+              this.$router.push('/Menu')
+            }
+
           }
         }
       }
@@ -268,7 +275,9 @@ export default {
         }
 
       } catch (error) {
-        console.error('Error al procesar la orden:', error)
+        if (error.response && error.response.status === 400) {
+          return error.response;
+        }
       }
     },
 
@@ -306,9 +315,10 @@ export default {
 
     async cancelarOrden() {
       try {
+        console.log(localStorage.getItem('order_id'));
         // Lógica para cancelar la orden
         await api.post('/order/cancel',
-           { order_id: localStorage.getItem('order_id') },
+          { order_id: localStorage.getItem('order_id'), user_id: localStorage.getItem('userId')},
           {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           }
@@ -318,6 +328,7 @@ export default {
         console.error('Error al cancelar la orden:', error);
       }
     },
+
     cancelarOrdenSync() {
       const orderId = localStorage.getItem('order_id');
       const token = localStorage.getItem('token');
@@ -337,8 +348,9 @@ export default {
         console.log('Orden cancelada con sendBeacon.');
       } else {
         console.error('Error al cancelar la orden con sendBeacon.');
-    }
-  }
+      }
+    },
+    
   },
   mounted() {
     // Lógica de inicialización
@@ -357,7 +369,9 @@ export default {
     window.removeEventListener('beforeunload', this.cancelarOrdenSync);
 
     // Cancelar la orden explícitamente al desmontar el componente
-    this.cancelarOrden();
+    if (!this.orderCompleted) {
+      this.cancelarOrden();
+    }
   }
 
 }
