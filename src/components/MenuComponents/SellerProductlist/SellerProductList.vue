@@ -56,6 +56,7 @@ import EditProductModal from './EditProductModal.vue';
 import CreateProduct from './CreateProduct.vue';
 import DeleteConfirmationModal from './DeleteConfirmationModal.vue';
 import VariantProduct from './VariantProduct.vue';   
+
 import axios from 'axios';
 
 export default {

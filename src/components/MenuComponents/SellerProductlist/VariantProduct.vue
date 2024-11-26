@@ -1,189 +1,268 @@
 <template>
-    <div v-if="showModal" class="modal-overlay">
-      <div class="modal-content">
-        <span class="close" @click="closeModal">&times;</span>
-        <h2 class="modal-title">Crear Variantes</h2>
-        <form @submit.prevent="saveVariants">
-          <!-- Variantes -->
-          <div class="form-group">
-            <label>Variantes</label>
-            <div v-for="(variant, index) in variants" :key="index" class="variant-group">
-              <div>
-                <label for="variant-type">Tipo</label>
-                <input
-                  type="text"
-                  v-model="variant.type"
-                  placeholder="Ej: Talla, Color"
-                  required
-                />
-              </div>
-              <div>
-                <label for="variant-options">Opciones</label>
-                <input
-                  type="text"
-                  v-model="variant.options"
-                  placeholder="Ej: S,M,L (separar con comas)"
-                  required
-                />
-              </div>
-              <button type="button" @click="removeVariant(index)">Eliminar Variante</button>
+  <div v-if="showModal" class="modal-overlay">
+    <div class="modal-content">
+      <span class="close" @click="closeModal">&times;</span>
+      <h2 class="modal-title">Crear Variantes</h2>
+      <form @submit.prevent="saveVariants">
+        <!-- Variantes -->
+        <div class="form-group">
+          <label>Variantes</label>
+          <div v-for="(variant, index) in variants" :key="index" class="variant-group">
+            <div>
+              <label for="variant-type">Tipo</label>
+              <input
+                type="text"
+                v-model="variant.type"
+                placeholder="Ej: Talla, Color"
+                required
+              />
             </div>
-            <button type="button" @click="addVariant" class="add-variant-button">
-              Agregar Variante
+            <div>
+              <label for="variant-options">Opciones</label>
+              <input
+                type="text"
+                v-model="variant.options"
+                placeholder="Ej: S,M,L (separar con comas)"
+                required
+              />
+            </div>
+            <button type="button" class="remove-variant" @click="removeVariant(index)">
+              Eliminar Variante
             </button>
           </div>
-  
-          <!-- Botones de acción -->
-          <div class="form-actions">
-            <button type="button" @click="closeModal" class="cancel-button">Cancelar</button>
-            <button type="submit" class="save-button">Guardar Variantes</button>
+          <button type="button" @click="addVariant" class="add-variant-button">
+            Agregar Variante
+          </button>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="form-actions">
+          <button type="button" @click="closeModal" class="cancel-button">Cancelar</button>
+          <button type="submit" class="save-button">Guardar Variantes</button>
+          <button type="button" @click="openViewVariantsModal" class="view-button">Ver Variantes</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Modal para ver y editar variantes -->
+    <div v-if="showViewVariantsModal" class="modal-overlay">
+      <div class="modal-content">
+        <span class="close" @click="closeViewVariantsModal">&times;</span>
+        <h2 class="modal-title">Editar Variantes</h2>
+        <div v-if="loadingVariants" class="loading-message">Cargando variantes...</div>
+        <div v-else-if="viewVariants.length === 0" class="no-variants-message">
+          No hay variantes disponibles para este producto.
+        </div>
+        <div v-else v-for="(variant, index) in viewVariants" :key="index" class="variant-group">
+          <div>
+            <label for="variant-type">Tipo</label>
+            <input
+              type="text"
+              v-model="variant.type"
+              placeholder="Ej: Talla, Color"
+            />
           </div>
-        </form>
+          <div>
+            <label for="variant-options">Opciones</label>
+            <input
+              type="text"
+              v-model="variant.options"
+              placeholder="Ej: S,M,L (separar con comas)"
+            />
+          </div>
+          <button type="button" class="remove-variant" @click="removeVariantFromView(index)">
+            Eliminar
+          </button>
+        </div>
+        <div class="form-actions">
+          <button type="button" @click="closeViewVariantsModal" class="cancel-button">
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import axios from "axios";
-  
-  export default {
-    props: {
-      productId: Number, // ID del producto al que se agregarán las variantes
+  </div>
+</template>
+
+<script>
+import axios from "axios";
+
+export default {
+  props: {
+    productId: Number,
+  },
+  data() {
+    return {
+      showModal: true,
+      showViewVariantsModal: false,
+      variants: [],
+      viewVariants: [], // Variantes cargadas desde la API
+      loadingVariants: false, // Estado de carga
+    };
+  },
+  methods: {
+    closeModal() {
+      this.$emit("close");
     },
-    data() {
-      return {
-        showModal: true,
-        variants: [], // Lista de variantes creadas
-      };
+    openViewVariantsModal() {
+      this.loadVariants(); // Cargar las variantes desde la API
+      this.showViewVariantsModal = true;
     },
-    methods: {
-      closeModal() {
-        this.$emit("close");
-      },
-      addVariant() {
-        this.variants.push({ type: "", options: "" });
-      },
-      removeVariant(index) {
-        this.variants.splice(index, 1);
-      },
-      async saveVariants() {
+    closeViewVariantsModal() {
+      this.showViewVariantsModal = false;
+    },
+    addVariant() {
+      this.variants.push({ type: "", options: "" });
+    },
+    removeVariant(index) {
+      this.variants.splice(index, 1);
+    },
+    removeVariantFromView(index) {
+      this.viewVariants.splice(index, 1); // Elimina de la lista cargada
+    },
+    async loadVariants() {
+      this.loadingVariants = true; // Mostrar mensaje de carga
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/products/${this.productId}/variation`
+        );
+        this.viewVariants = response.data.map((variant) => ({
+          ...variant,
+          options: variant.options.join(", "), // Combina las opciones en una cadena
+        }));
+      } catch (error) {
+        console.error(
+          "Error al cargar las variantes:",
+          error.response?.data || error.message
+        );
+        alert("No se pudieron cargar las variantes del producto.");
+      } finally {
+        this.loadingVariants = false; // Ocultar mensaje de carga
+      }
+    },
+    async saveVariants() {
   try {
-    const formattedVariants = this.variants.map((variant) => ({
-      ...variant,
-      options: variant.options
-        .split(',')
-        .map((option) => option.trim())
-        .filter(Boolean), // Elimina opciones vacías
-    }));
+    // Este es el cambio clave
+    for (const variant of this.variants) {
+      if (variant.type && variant.options) {
+        const formattedOptions = variant.options
+          .split(',')
+          .map((option) => option.trim())
+          .filter(Boolean);
 
-    // Llamada a la API para guardar variantes
-    await axios.post(
-      `http://localhost:8000/api/products/${this.productId}/variants`,
-      { variants: formattedVariants }
-    );
+        await axios.post(
+         `http://localhost:8000/api/products/${this.productId}/variation`, 
+          {
+            type: variant.type,
+            options: formattedOptions
+          }
+        );
+      }
+    }
 
-    console.log('Variantes guardadas con éxito.');
-    this.$emit('variants-saved', formattedVariants); // Emitir evento al padre
+    console.log('Variantes guardadas con éxito');
+    this.$emit('variants-saved', this.variants);
     this.closeModal();
   } catch (error) {
     console.error('Error al guardar las variantes:', error.response?.data || error.message);
     alert('Hubo un problema al guardar las variantes. Verifique los datos.');
   }
+},
+  },
+};
+</script>
+
+
+<style scoped>
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  z-index: 1000; 
 }
 
-    },
-  };
-  </script>
-  
-  <style scoped>
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-    box-sizing: border-box;
-    overflow-y: auto;
-  }
-  
-  .modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 500px;
-    width: 100%;
-    position: relative;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    overflow-y: auto;
-  }
-  
-  .close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    color: #333;
-    cursor: pointer;
-  }
-  
-  .modal-title {
-    font-size: 20px;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .variant-group {
-    margin-bottom: 10px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-  
-  .variant-group input {
-    flex: 1;
-  }
-  
-  .add-variant-button {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #0ea5e9;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .form-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-  
-  .cancel-button {
-    background-color: #e74c3c;
-    color: #fff;
-    padding: 10px 15px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .save-button {
-    background-color: #0ea5e9;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-  }
-  </style>
-  
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  color: #333;
+  cursor: pointer;
+}
+
+.modal-title {
+  font-size: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.variant-group {
+  margin-bottom: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.variant-group input {
+  flex: 1;
+}
+
+.add-variant-button,
+.view-button,
+.remove-variant {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #0ea5e9;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.cancel-button {
+  background-color: #e74c3c;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.save-button {
+  background-color: #0ea5e9;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+</style>
