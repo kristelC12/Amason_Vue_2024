@@ -17,6 +17,7 @@
             <th>Descripción</th>
             <th>Stock</th>
             <th>Precio</th>
+            <th>Descuento</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -31,6 +32,7 @@
             <td data-label="Descripción">{{ product.description }}</td>
             <td data-label="Stock">{{ product.stock }}</td>
             <td data-label="Precio">{{ formatCurrency(product.price) }}</td>
+            <td data-label="Descuento">{{ product.discount }}</td>
             <td data-label="Acciones" class="action-buttons">
               <button class="edit-button" @click="openEditModal(product)">Editar</button>
               <button class="delete-button" @click="confirmDelete(product.product_id)">Eliminar</button>

@@ -30,6 +30,19 @@
           <input type="text" id="price" v-model="localProduct.price" required />
         </div>
 
+        <!-- Descuento -->
+        <div class="form-group">
+          <label for="discount">Descuento (%)</label>
+          <input
+            type="number"
+            id="discount"
+            v-model.number="localProduct.discount"
+            min="0"
+            max="100"
+            required
+          />
+        </div>
+
         <!-- Stock -->
         <div class="form-group">
           <label for="stock">Stock</label>
@@ -92,6 +105,7 @@ export default {
           price: this.localProduct.price,
           stock: this.localProduct.stock,
           category_id: this.localProduct.category_id,
+          discount: this.localProduct.discount, // Agregar el descuento
         };
 
         // Realiza la actualización de datos básicos
@@ -148,6 +162,7 @@ export default {
   },
 };
 </script>
+
 
 
 <style scoped>
