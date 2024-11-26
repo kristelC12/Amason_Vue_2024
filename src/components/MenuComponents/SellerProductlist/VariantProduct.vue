@@ -60,6 +60,7 @@
               type="text"
               v-model="variant.type"
               placeholder="Ej: Talla, Color"
+              disabled
             />
           </div>
           <div>
