@@ -9,15 +9,18 @@
         <div
           v-for="(producto, index) in displayedProducts"
           :key="producto.product_id"
-          :class="{
-            'producto': true,
-            'producto--current': index === 1,
-            'producto--small': index !== 1,
-          }"
+          :class="['producto-card', index === 1 ? 'current' : '']"
         >
-          <img :src="producto.images[0].image_path" alt="Imagen del producto" class="product-image" />
-          <h4>{{ producto.name }}</h4>
-          <p>Precio: ${{ producto.price }}</p>
+          <div class="producto-card-content">
+            <div class="discount" v-if="producto.discount && index === 1">
+              {{ producto.discount }}% OFF
+            </div>
+            <img :src="producto.images[0]?.image_path" alt="Imagen del producto" class="product-image" />
+            <h4 class="producto-name">{{ producto.name }}</h4>
+            <p class="producto-price">$ {{ producto.price }}</p>
+            <p class="original-price">Precio Original: ${{ calculateOriginalPrice(producto) }}</p>
+            <button class="buy-button">Comprar</button>
+          </div>
         </div>
       </div>
       <button v-if="recomendaciones.length > 1" @click="nextProduct" class="nav-button">
@@ -26,6 +29,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -38,21 +42,22 @@ export default {
     };
   },
   computed: {
-    displayedProducts() {
-      const total = this.recomendaciones.length;
+  displayedProducts() {
+    const total = this.recomendaciones.length;
 
-      // Si hay menos de 3 productos, solo muestra uno
-      if (total < 3) {
-        return [this.recomendaciones[this.currentIndex]];
-      }
-
-      return [
-        this.recomendaciones[(this.currentIndex - 1 + total) % total],
-        this.recomendaciones[this.currentIndex],
-        this.recomendaciones[(this.currentIndex + 1) % total]
-      ];
+    // Si hay menos de 3 productos, muestra solo uno
+    if (total < 3) {
+      return [this.recomendaciones[this.currentIndex]];
     }
-  },
+
+    return [
+      this.recomendaciones[(this.currentIndex - 1 + total) % total], // Producto anterior
+      this.recomendaciones[this.currentIndex], // Producto actual
+      this.recomendaciones[(this.currentIndex + 1) % total] // Producto siguiente
+    ];
+  }
+},
+
   async mounted() {
     try {
       const response = await axios.get('http://127.0.0.1:8000/api/recommendationByCart', {
@@ -68,6 +73,10 @@ export default {
   methods: {
     nextProduct() {
       this.currentIndex = (this.currentIndex + 1) % this.recomendaciones.length;
+    },
+
+    calculateOriginalPrice(producto) {
+      return (producto.price / (1 - producto.discount / 100)).toFixed(2);
     },
     prevProduct() {
       this.currentIndex =
@@ -95,16 +104,20 @@ export default {
   color: white;
   border: none;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 50%;
   cursor: pointer;
   font-size: 18px;
   margin: 0 10px;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-button:hover {
   background-color: #106384;
   transform: scale(1.05);
-  animation: fa-beat 1.5s infinite;
 }
 
 .productos {
@@ -113,50 +126,81 @@ export default {
   overflow: hidden;
 }
 
-.producto {
-  width: 300px;
-  text-align: center;
-  margin: 0 20px;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+.producto-card {
+  background: #fff;
+  border-radius: 10px;
+  width: 200px;
+  height: 300px;
+  margin: 0 30px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   opacity: 0.6;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
 }
 
-.producto--current {
-  transform: scale(1.1);
+.producto-card.current {
   opacity: 1;
-  font-weight: bold;
+  transform: scale(1.1);
 }
 
-.producto--small {
-  transform: scale(0.8);
-  opacity: 0.8;
+.discount {
+  background-color: #f00;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 
 .product-image {
-  width: 100px; /* Ancho fijo para todas las imágenes */
-  height: 100px; /* Alto fijo para todas las imágenes */
-  object-fit: cover; /* Mantiene la proporción de la imagen y recorta si es necesario */
-  margin-bottom: 10px; /* Espacio entre la imagen y el texto */
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  margin: 0 auto 10px;
 }
 
-.producto h4,
-.producto p {
-  margin: 5px 0;
+.producto-name {
+  font-size: 16px;
+  font-weight: bold;
 }
 
-/* Responsive - Muestra solo el producto central en móviles */
+.producto-price {
+  font-size: 18px;
+  color: #058dc3;
+}
+
+.buy-button {
+  background-color: #106384;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.buy-button:hover {
+  background-color: #058dc3;
+}
+.original-price {
+  font-size: 14px;
+  color: #777;
+  text-decoration: line-through;
+}
+
 @media (max-width: 900px) {
   .productos {
     justify-content: center;
   }
-  
-  .producto--small {
-    display: none; /* Oculta los productos laterales */
-  }
-  
-  .producto--current {
-    transform: scale(1); /* Ajusta el tamaño del producto central */
-    opacity: 1;
+  .producto-card:not(.current) {
+    display: none;
   }
 }
+
 </style>
