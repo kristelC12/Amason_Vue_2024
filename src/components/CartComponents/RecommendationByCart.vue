@@ -12,13 +12,16 @@
           :class="['producto-card', index === 1 ? 'current' : '']"
         >
           <div class="producto-card-content">
-            <div class="discount" v-if="producto.discount && index === 1">
-              {{ producto.discount }}% OFF
+            <div class="discount-badge" v-if="producto.discount && index === 1">
+              {{ producto.discount }}% off
             </div>
             <img :src="producto.images[0]?.image_path" alt="Imagen del producto" class="product-image" />
             <h4 class="producto-name">{{ producto.name }}</h4>
-            <p class="producto-price">$ {{ producto.price }}</p>
-            <p class="original-price">Precio Original: ${{ calculateOriginalPrice(producto) }}</p>
+            <p class="producto-price">₡ {{ producto.price }}</p>
+            <p v-if="producto.discount" class="original-price">
+                    Precio Original: ₡ {{ calculateOriginalPrice(producto) }}
+            </p>
+            
             <button class="buy-button">Comprar</button>
           </div>
         </div>
@@ -74,6 +77,7 @@ export default {
     nextProduct() {
       this.currentIndex = (this.currentIndex + 1) % this.recomendaciones.length;
     },
+
 
     calculateOriginalPrice(producto) {
       return (producto.price / (1 - producto.discount / 100)).toFixed(2);
@@ -147,15 +151,16 @@ export default {
   transform: scale(1.1);
 }
 
-.discount {
-  background-color: #f00;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 14px;
+.discount-badge {
   position: absolute;
   top: 10px;
-  right: 10px;
+  left: 10px;
+  background-color: #ff4500;
+  color: white;
+  font-size: 14px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-weight: bold;
 }
 
 .product-image {
