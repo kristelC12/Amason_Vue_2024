@@ -46,13 +46,19 @@
           <div class="line-2">Pedidos</div>
         </router-link>
       </li>
+      
       <!-- Opción "Ver Tickets" para admin -->
-      <li v-if="isAdminOrUser">
-        <a href="#" @click.prevent="goToTickets">
-          <div class="line-1">Devoluciones y</div>
-          <div class="line-2">Servicio al cliente</div>
-        </a>
-      </li>
+      <!-- Opción "Ver Tickets" para admin -->
+<li v-if="isAdminOrUser" class="dropdown">
+  <a href="#">
+    <div class="line-1">Devoluciones y</div>
+    <div class="line-2">Servicio al cliente</div>
+  </a>
+  <ul class="dropdown-content">
+    <li><a href="#" @click.prevent="goToTickets">Ver Tickets</a></li>
+    <li><a href="#" @click.prevent="goToReturnPanel">Devoluciones</a></li>  
+  </ul>
+</li>
       <li class="cart-container">
         <router-link to="/Carrito">
           <div class="line-1"><i class="fa-solid fa-cart-shopping"></i></div>
@@ -183,6 +189,14 @@ async created() {
         this.$router.push('/admin-tickets'); // Si es admin, redirigir a la vista de admin-tickets
       } else {
         this.$router.push('/tickets'); // Si es usuario normal, redirigir a la vista de tickets
+      } 
+    },
+    goToReturnPanel() {
+      const role = localStorage.getItem('userRole');
+      if (role && role.includes('admin')) {
+        this.$router.push('/return-admin-panel');
+      } else {
+        this.$router.push('/return-panel');
       }
     },
     logout() {
@@ -438,4 +452,40 @@ i {
 .no-scroll {
   overflow: hidden;
 }
+</style>
+
+<style scoped>
+/* ... código existente ... */
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  border-radius: 5px;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* ... código existente ... */
 </style>
