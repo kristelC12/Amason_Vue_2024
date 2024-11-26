@@ -73,11 +73,16 @@
           <button type="button" class="remove-variant" @click="removeVariantFromView(index)">
             Eliminar
           </button>
+          <!-- Botón de actualizar -->
+          <button type="button" class="update-variant" @click="updateVariant(index)">
+  Actualizar
+</button>
         </div>
         <div class="form-actions">
           <button type="button" @click="closeViewVariantsModal" class="cancel-button">
             Cerrar
           </button>
+          
         </div>
       </div>
     </div>
@@ -117,6 +122,30 @@ export default {
     removeVariant(index) {
       this.variants.splice(index, 1);
     },
+    
+   // No recargar las variantes después de la actualización
+async updateVariant(index) {
+  const variantToUpdate = this.viewVariants[index];
+  try {
+    await axios.put(
+      `http://localhost:8000/api/products/${this.productId}/variation`, 
+      {
+        type: variantToUpdate.type, 
+        options: variantToUpdate.options.split(',').map(option => option.trim())
+      }
+    );
+    
+    // Actualiza la variante en el estado local
+    this.viewVariants[index] = { ...variantToUpdate }; // Solo actualiza la variante modificada
+    alert("La variante se actualizó correctamente.");
+    console.log("Variante actualizada con éxito");
+    
+  } catch (error) {
+    console.error("Error al actualizar la variante:", error.response?.data || error.message);
+    alert("Hubo un problema al actualizar la variante.");
+  }
+}
+,
 
     async removeVariantFromView(index) {
   const variantToDelete = this.viewVariants[index];
@@ -133,6 +162,8 @@ export default {
     // Si la eliminación es exitosa, eliminar de la vista
     this.viewVariants.splice(index, 1);
     console.log("Variante eliminada con éxito");
+    alert("Variante eliminada con éxito");
+
   } catch (error) {
     console.error("Error al eliminar la variante:", error.response?.data || error.message);
     alert("Hubo un problema al eliminar la variante.");
@@ -162,7 +193,6 @@ export default {
     
     async saveVariants() {
   try {
-    // Este es el cambio clave
     for (const variant of this.variants) {
       if (variant.type && variant.options) {
         const formattedOptions = variant.options
@@ -181,6 +211,8 @@ export default {
     }
 
     console.log('Variantes guardadas con éxito');
+    alert("Variantes guardadas con éxito");
+
     this.$emit('variants-saved', this.variants);
     this.closeModal();
   } catch (error) {
@@ -207,18 +239,19 @@ export default {
   padding: 10px;
   box-sizing: border-box;
   overflow-y: auto;
-  z-index: 1000; 
+  z-index: 1000;
 }
 
 .modal-content {
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
-  max-width: 500px;
+  max-width: 600px;  
   width: 100%;
   position: relative;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
+
 
 .close {
   position: absolute;
@@ -252,7 +285,8 @@ export default {
 
 .add-variant-button,
 .view-button,
-.remove-variant {
+.remove-variant,
+.update-variant {  /* Estilo para el nuevo botón de actualizar */
   margin-top: 10px;
   padding: 10px;
   background-color: #0ea5e9;
@@ -260,6 +294,15 @@ export default {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.update-variant {
+  background-color: #28a745;  /* Color verde */
+  transition: background-color 0.3s ease;
+}
+
+.update-variant:hover {
+  background-color: #218838;  /* Color más oscuro */
 }
 
 .form-actions {
@@ -285,4 +328,5 @@ export default {
   border: none;
   cursor: pointer;
 }
+
 </style>
