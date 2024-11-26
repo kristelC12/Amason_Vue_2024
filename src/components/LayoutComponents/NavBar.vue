@@ -223,7 +223,8 @@ nav {
 }
 .trending{
   color: white;
-  font-weight: bold;
+  font-weight: bold;}
+  
 /* Estilo del combobox */
 .category-dropdown {
   margin-left: 20px;
