@@ -22,6 +22,17 @@
           <p class="price">Precio: ${{ product.price }}</p>
           <p class="original-price">Precio Original: ${{ calculateOriginalPrice(product) }}</p>
         </div>
+        <i
+        v-if="isAdding"
+        class="fa-solid fa-spinner fa-spin-pulse fa-2x"
+        :style="{ cursor: 'not-allowed' }"
+      ></i>
+      <i
+        v-else
+        @click="addProduct(product)"
+        class="fas fa-cart-plus fa-2x"
+        :style="{ cursor: 'pointer' }"
+      ></i>
       </div>
     </div>
   </div>
@@ -39,6 +50,16 @@ export default {
   methods: {
     calculateOriginalPrice(product) {
       return (product.price / (1 - product.discount / 100)).toFixed(2);
+    },
+    async addProduct(product) {
+      this.isAdding = true; 
+      try {
+        await this.addProductToCart(product);
+      } catch (error) {
+        console.error('Error adding product to cart:', error);
+      } finally {
+        this.isAdding = false; 
+      }
     },
   },
   async mounted() {
@@ -140,5 +161,15 @@ export default {
   font-size: 14px;
   color: #777;
   text-decoration: line-through;
+}
+
+i {
+  margin-left: 5px;
+  cursor: pointer;
+  color: black;
+}
+
+.fa-spinner {
+  color: #f1a80b;
 }
 </style>

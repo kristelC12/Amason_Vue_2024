@@ -3,10 +3,26 @@
     <img
   :src="product.product_image ? product.product_image : 'https://via.placeholder.com/150'"
   :alt="product.product_name"
+  :discount="product.product_discount"
 />
     <h3>{{ product.product_name }}</h3>
-    <div class="price-addCart">
-      <p class="price">₡ {{ product.product_price.toFixed(2) }}</p>
+    <p
+          v-if="product.product_discount"
+          class="original-price"
+        >
+          ₡ {{ product.product_price.toFixed(2) }}
+        </p>
+    <div class="price-container">
+        <!-- Mostrar el precio original si hay descuento -->
+        
+        <p class="price">
+          ₡ {{ discountedPrice.toFixed(2) }}
+        </p>
+        <span v-if="product.product_discount" class="discount-badge">
+          {{ product.product_discount }}% off
+        </span>
+
+      
       <i
         v-if="isAdding"
         class="fa-solid fa-spinner fa-spin-pulse fa-2x"
@@ -34,6 +50,15 @@ export default {
     product: {
       type: Object,
       required: true,
+    },
+  },
+  computed: {
+    // Calcular el precio con descuento
+    discountedPrice() {
+      if (this.product.product_discount) {
+        return this.product.product_price - (this.product.product_price * this.product.product_discount / 100);
+      }
+      return this.product.product_price;
     },
   },
   methods: {
@@ -64,8 +89,10 @@ export default {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.5s;
   margin: 5px 8px;
+  position: relative; /* Necesario para posicionar correctamente el badge */
 }
-img{
+
+img {
   width: 100%;
   height: 200px;
   object-fit: contain;
@@ -77,7 +104,20 @@ img{
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-.price-addCart {
+.discount-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px; /* Ajusta la posición según tus necesidades */
+  background-color: #ff4500;
+  color: white;
+  font-size: 14px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-weight: bold;
+  z-index: 10; /* Asegura que el badge siempre esté por encima de otros elementos */
+}
+
+.price-container {
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -87,6 +127,14 @@ img{
 .price {
   font-size: 1.2rem;
   font-weight: bold;
+}
+
+.original-price {
+  margin-top: -10px;
+  margin-bottom: -5px;
+  font-size: 14px;
+  color: #777;
+  text-decoration: line-through;
 }
 
 i {
