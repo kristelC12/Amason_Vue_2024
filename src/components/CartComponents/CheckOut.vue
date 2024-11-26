@@ -38,13 +38,14 @@
               <div class="payment__types">
                 <div class="payment__type payment__type--cc" :class="{ active: selectedMethod === 'card' }"
                   @click="selectPaymentMethod('card')">
-                  <i class="fa-solid fa-credit-card fa-xl" style="color: #21246e"></i>
-                  <p>Tarjeta Crédito/Débito</p>
-                </div>
-                <div class="payment__type payment__type--paypal" :class="{ active: selectedMethod === 'paypal' }"
-                  @click="selectPaymentMethod('paypal')">
-                  <i class="fa-brands fa-paypal fa-2xl" style="color: #21246e"></i>
-                  <p>Paypal</p>
+                  <p>Tarjeta Crédito/Débito:</p>
+                  <i class="fa-brands fa-cc-mastercard fa-xl" style="color: #21246e"></i>
+                  <i class="fa-brands fa-cc-visa fa-xl" style="color: #21246e"></i>
+                  <i class="fa-brands fa-cc-apple-pay fa-xl" style="color: #21246e"></i>
+                  <i class="fa-brands fa-cc-jcb fa-xl" style="color: #21246e"></i>
+                  <i class="fa-brands fa-google-pay fa-xl" style="color: #21246e"></i>
+                  <img src="@/assets/american-ex.svg" alt="AmericanExpress" width="32" height="32"
+                    style="color: #21246e" />
                 </div>
               </div>
             </div>
@@ -63,9 +64,7 @@
                   <input type="text" id="cardNumber" name="cardNumber" placeholder="Enter Card Number"
                     v-model="user.cardNumber" maxlength="19" @input="formatCardNumber" />
                   <div class="payment-icons">
-                    <i class="fa-brands fa-cc-mastercard fa-xl" style="color: #21246e"></i>
-                    <i class="fa-brands fa-cc-visa fa-xl" style="color: #21246e"></i>
-                    <i class="fa-brands fa-cc-apple-pay fa-xl" style="color: #21246e"></i>
+                    <i class="fa-solid fa-credit-card fa-xl" style="color: #21246e"></i>
                   </div>
                 </div>
               </div>
@@ -82,7 +81,7 @@
                 <div v-if="tooltipVisible" class="tooltip-text">
                   Los tres dígitos en la parte posterior de tu tarjeta
                 </div>
-                <input type="password" id="cvv" name="cvv" placeholder="***" maxlength="3" />
+                <input type="password" id="cvv" name="cvv" placeholder="****" maxlength="4" minlength="3" />
               </div>
             </div>
           </div>
@@ -95,7 +94,9 @@
     <div class="actions">
       <button @click="completeOrder" type="button" class="btn action__submit">
         Completar la Orden
-        <i class="icon icon-arrow-right-circle"></i>
+      </button>
+      <button @click="cancelarOrden" type="button" class="btn action__cancel">
+        Cancelar
       </button>
     </div>
   </div>
@@ -104,7 +105,6 @@
 <script>
 import api from '../../../services/api'
 import { mapActions } from 'vuex'
-
 
 export default {
   name: 'CheckoutComponent',
@@ -142,20 +142,19 @@ export default {
     },
 
     formatExpDate() {
-      let expDate = this.user.expDate.replace(/\D/g, '');
+      let expDate = this.user.expDate.replace(/\D/g, '')
       if (expDate.length > 2) {
-        expDate = expDate.slice(0, 2) + '/' + expDate.slice(2, 4);
+        expDate = expDate.slice(0, 2) + '/' + expDate.slice(2, 4)
       }
-      this.user.expDate = expDate;
+      this.user.expDate = expDate
     },
 
-
     formatPhoneNumber() {
-      let phoneNumber = this.user.phone_number.replace(/\D/g, '');
+      let phoneNumber = this.user.phone_number.replace(/\D/g, '')
       if (phoneNumber.length > 4) {
-        phoneNumber = phoneNumber.slice(0, 4) + ' ' + phoneNumber.slice(4, 8);
+        phoneNumber = phoneNumber.slice(0, 4) + ' ' + phoneNumber.slice(4, 8)
       }
-      this.user.phone_number = phoneNumber;
+      this.user.phone_number = phoneNumber
     },
 
     selectPaymentMethod(method) {
@@ -209,32 +208,36 @@ export default {
     },
 
     validateExpDate() {
-      const expDate = document.getElementById('exp').value;
+      const expDate = document.getElementById('exp').value
 
-      const [month, year] = expDate.split('/').map(Number);
+      const [month, year] = expDate.split('/').map(Number)
       if (month < 1 || month > 12) {
-        alert('Fecha de expiración inválida.');
-        return false;
+        alert('Fecha de expiración inválida.')
+        return false
       }
 
-      const currentYear = new Date().getFullYear() % 100;
-      const currentMonth = new Date().getMonth() + 1;
+      const currentYear = new Date().getFullYear() % 100
+      const currentMonth = new Date().getMonth() + 1
 
       if (year < currentYear || (year === currentYear && month < currentMonth)) {
-        alert('La tarjeta está expirada.');
-        return false;
+        alert('La tarjeta está expirada.')
+        return false
       }
 
-      return true;
+      return true
     },
 
     // Formatear número de tarjeta
     formatCardNumber() {
-      this.user.cardNumber = this.user.cardNumber.replace(/\s+/g, '').replace(/[^0-9]/gi, '').replace(/(.{4})/g, '$1 ').trim();
+      this.user.cardNumber = this.user.cardNumber
+        .replace(/\s+/g, '')
+        .replace(/[^0-9]/gi, '')
+        .replace(/(.{4})/g, '$1 ')
+        .trim()
 
       this.$nextTick(() => {
-        document.getElementById('cardNumber').value = this.user.cardNumber;
-      });
+        document.getElementById('cardNumber').value = this.user.cardNumber
+      })
     },
 
     // Validar y completar la orden
@@ -260,13 +263,12 @@ export default {
         const response = await api.post('/order/process', datosOrden, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
-          },
+          }
         })
 
         if (response.status === 404) {
           alert('Orden no encontrada')
         }
-
       } catch (error) {
         console.error('Error al procesar la orden:', error)
       }
@@ -276,90 +278,87 @@ export default {
       try {
         const response = await api.get('/deliveryInformation', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
+        })
 
         if (response.status === 200) {
-          this.user = response.data;
+          this.user = response.data
         }
       } catch (error) {
         if (error.response && error.response.status === 404) {
-          alert('No se encontró información de envío.');
+          alert('No se encontró información de envío.')
         }
-        return false;
+        return false
       }
     },
 
-
     async actualizarInformacionUsuario(user) {
       try {
-        await api.put('/deliveryInformation', user,
-          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-        )
+        await api.put('/deliveryInformation', user, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        })
 
-        return true;
-
+        return true
       } catch (error) {
         console.error('Error al actualizar la información del usuario:', error)
-
       }
     },
 
     async cancelarOrden() {
       try {
         // Lógica para cancelar la orden
-        await api.post('/order/cancel',
-           { order_id: localStorage.getItem('order_id') },
+        await api.post(
+          '/order/cancel',
+          { order_id: localStorage.getItem('order_id') },
           {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           }
-        );
-        console.log('Orden cancelada exitosamente.');
+        )
+        console.log('Orden cancelada exitosamente.')
       } catch (error) {
-        console.error('Error al cancelar la orden:', error);
+        console.error('Error al cancelar la orden:', error)
       }
     },
     cancelarOrdenSync() {
-      const orderId = localStorage.getItem('order_id');
-      const token = localStorage.getItem('token');
+      const orderId = localStorage.getItem('order_id')
+      const token = localStorage.getItem('token')
 
       if (!orderId || !token) {
-        console.warn('No hay información de orden o token disponible.');
-        return;
+        console.warn('No hay información de orden o token disponible.')
+        return
       }
 
       // Usar sendBeacon para enviar la cancelación de manera síncrona
-      const url = 'http://localhost:8000/api/order/cancel';
-      const payload = JSON.stringify({ order_id: orderId, user_id: localStorage.getItem('userId') });
-      const blob = new Blob([payload], { type: 'application/json' });
+      const url = 'http://localhost:8000/api/order/cancel'
+      const payload = JSON.stringify({ order_id: orderId, user_id: localStorage.getItem('userId') })
+      const blob = new Blob([payload], { type: 'application/json' })
 
-      const siwi = navigator.sendBeacon(url, blob);
+      const siwi = navigator.sendBeacon(url, blob)
       if (siwi) {
-        console.log('Orden cancelada con sendBeacon.');
+        console.log('Orden cancelada con sendBeacon.')
       } else {
-        console.error('Error al cancelar la orden con sendBeacon.');
+        console.error('Error al cancelar la orden con sendBeacon.')
+      }
     }
-  }
   },
   mounted() {
     // Lógica de inicialización
     this.obtenerInformacionUsuario().then(() => {
-      this.user.paymentMethod = 'card';
-    });
+      this.user.paymentMethod = 'card'
+    })
 
-    this.order_id = localStorage.getItem('order_id');
+    this.order_id = localStorage.getItem('order_id')
 
     // Agregar listener para beforeunload (cerrar navegador o pestaña)
-    window.addEventListener('beforeunload', this.cancelarOrdenSync);
+    window.addEventListener('beforeunload', this.cancelarOrdenSync)
   },
 
   beforeUnmount() {
     // Remover el listener para evitar fugas de memoria
-    window.removeEventListener('beforeunload', this.cancelarOrdenSync);
+    window.removeEventListener('beforeunload', this.cancelarOrdenSync)
 
     // Cancelar la orden explícitamente al desmontar el componente
-    this.cancelarOrden();
+    this.cancelarOrden()
   }
-
 }
 </script>
 
@@ -395,9 +394,8 @@ export default {
 /* Métodos de pago */
 .payment__types {
   display: flex;
+  
   justify-content: center;
-  align-content: center;
-  align-self: center;
   gap: 10px;
   width: 500px;
   height: 70px;
@@ -405,7 +403,7 @@ export default {
 
 .payment_methods,
 .payment__shipping {
-  flex: 1;
+
   justify-content: center;
   align-content: center;
   align-self: center;
@@ -416,7 +414,7 @@ export default {
   padding: 10px 20px;
   border-radius: 10px;
   cursor: pointer;
-  flex: 1;
+
   text-align: center;
   display: flex;
   align-items: center;
@@ -509,9 +507,9 @@ textarea {
 /* Texto del tooltip */
 .tooltip-text {
   position: absolute;
-  bottom: 125%;
+  bottom: 110%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-70%);
   background-color: #333;
   color: #fff;
   padding: 5px 10px;
@@ -563,7 +561,8 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 30px;
   padding: 20px 0 40px 0;
 }
 
@@ -573,7 +572,7 @@ textarea {
   letter-spacing: 1px;
   color: #fff;
   background-color: #f1a80b;
-  padding: 20px 60px;
+  padding: 20px 35px;
   white-space: nowrap;
   font-size: 16px;
   line-height: 1;
@@ -582,42 +581,12 @@ textarea {
   text-decoration: none;
 }
 
-.btn .icon {
-  margin-left: 10px;
-  font-size: 20px;
-}
-
 .btn:hover {
   -webkit-transform: translateY(-1px);
   transform: translateY(-1px);
   background-color: #f0ba47;
   cursor: pointer;
 }
-
-/* Responsivo */
-/* @media (max-width: 768px) {
-  .row-container {
-    flex-direction: column;
-  }
-
-  .form-group {
-    width: 100%;
-  }
-}
-
-@media (max-width: 500px) {
-
-  .card-pay,
-  .card-information {
-    width: 100%;
-    padding: 10px 20px;
-  }
-
-  .form-group input {
-    padding: 10px;
-    font-size: 12px;
-  }
-} */
 
 @media (width < 990px) {
   main {
@@ -644,16 +613,19 @@ textarea {
   }
 
   .payment__types {
-    width: 100%;
+    width: auto;
     display: flex;
-    justify-content: space-evenly;
+    height: auto;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .payment__type {
     display: flex;
     width: auto;
     padding: 0 10px;
-    justify-content: center;
+    justify-content: initial;
+    flex-wrap: wrap;
   }
 
   .card-information {
@@ -685,6 +657,10 @@ textarea {
 
   .payment-icons {
     right: 7px;
+  }
+
+  .actions {
+    flex-direction: column;
   }
 }
 </style>
