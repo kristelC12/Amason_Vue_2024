@@ -20,13 +20,12 @@
             </thead>
             <tbody>
               <tr v-for="returnItem in returns" :key="returnItem.id">
-                <td data-label="Orden">{{ returnItem.order }}</td>
+                <td data-label="Orden">{{ returnItem.id }}</td>
                 <td data-label="Producto">{{ returnItem.product }}</td>
                 <td data-label="Motivo">{{ returnItem.reason }}</td>
                 <td data-label="Estado">{{ returnItem.status }}</td>
                 <td data-label="Acciones">
-                  <button class="btn btn-accept" @click="acceptReturn(returnItem.id)">Aceptar</button>
-                  <button class="btn btn-cancel" @click="cancelReturn(returnItem.id)">Cancelar</button>
+                  <button class="btn btn-accept" @click="(returnItem.id)">Añadir Notas</button>
                 </td>
               </tr>
             </tbody>
@@ -36,57 +35,8 @@
       <div v-else class="loading">Cargando...</div>
     </div>
   </template>
-  
-  <script>
-import apiClient from '../../../services/api';  
 
-export default { 
-  data() {
-    return {
-      returns: [],
-      loading: true
-    };
-  },
-  created() {
-    this.fetchUserReturns();
-  },
-  methods: {
-    async acceptReturn(returnId) {
-      console.log("Aceptando devolución con ID:", returnId); // Para depuración
-      this.$router.push({ path: `/accept-return/${returnId}` });
-    },
-    async cancelReturn(returnId) {
-      console.log("Cancelando devolución con ID:", returnId); // Para depuración
-      this.$router.push({ path: `/cancel-return/${returnId}` });
-    },
-    async fetchUserReturns() {
-      try {
-        const token = localStorage.getItem('token');  
-        if (!token) {
-          throw new Error('Token de autenticación no disponible');
-        }
-        const response = await apiClient.get('/user-returns', {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,  
-          },
-        });
-        this.returns = response.data.map(returnItem => ({
-          id: returnItem.id,
-          order: returnItem.order,
-          product: returnItem.product,
-          reason: returnItem.reason,
-          status: returnItem.status,
-        }));
-      } catch (error) {
-        console.error("Error al obtener las devoluciones:", error);
-      } finally {
-        this.loading = false;
-      }
-    }
-  }
-};
-</script>
+  
 
 <style scoped>
 /* Reutiliza los estilos de TicketComponent.vue */

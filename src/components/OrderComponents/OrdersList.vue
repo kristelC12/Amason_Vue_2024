@@ -15,6 +15,9 @@
           </div>
           <div class="task-options">
             <button class="options-button">⋮</button>
+            <button v-if="order.status === 2" @click="requestReturn(order.order_id)" class="return-button">
+            Solicitar Devolución
+          </button>
           </div>
         </div>
       </div>
@@ -65,9 +68,14 @@
           }
           return false;
         }
+      },
+    requestReturn(orderId) {
+      // Redirigir a la vista ReturnRequestView con el ID de la orden
+      this.$router.push({ name: 'ReturnRequestView', params: { orderId } });
+    }
       }
     }
-  }
+  
   </script>
 
 <style scoped>
@@ -147,4 +155,14 @@
   cursor: pointer;
   color: #f1a80b;
 }
+.return-button {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #f1a80b;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 </style>
