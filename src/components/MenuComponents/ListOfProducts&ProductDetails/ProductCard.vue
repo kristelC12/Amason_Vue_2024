@@ -65,6 +65,7 @@ export default {
     ...mapActions('cart', ['addProductToCart']),
 
     async addProduct(product) {
+      console.log('Adding product to cart:', product);
       this.isAdding = true; 
       try {
         await this.addProductToCart(product);
