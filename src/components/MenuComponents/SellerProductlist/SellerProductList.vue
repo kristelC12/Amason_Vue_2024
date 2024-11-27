@@ -36,6 +36,7 @@
             <td data-label="Acciones" class="action-buttons">
               <button class="edit-button" @click="openEditModal(product)">Editar</button>
               <button class="delete-button" @click="confirmDelete(product.product_id)">Eliminar</button>
+              <button class="variant-button" @click="handleVariant(product.product_id)">Variante</button>
             </td>
           </tr>
         </tbody>
@@ -46,6 +47,9 @@
     <EditProductModal v-if="showEditModal" :product="selectedProduct" @close="closeEditModal" @save="saveProductChanges" />
     <CreateProduct v-if="showCreateModal" :showModal="showCreateModal" :store-id="storeId" @close-modal="closeCreateModal" @create="addNewProduct" />
     <DeleteConfirmationModal v-if="showDeleteModal" :showModal="showDeleteModal" :productId="deleteProductId" @close="cancelDelete" @confirm="deleteProduct" />
+   <!-- Codigo variante -->
+    <VariantProduct v-if="showVariantModal" :productId="selectedProductId" @close="closeVariantModal" @variants-saved="fetchProducts"
+  />
   </div>
 </template>
 
@@ -53,12 +57,16 @@
 import EditProductModal from './EditProductModal.vue';
 import CreateProduct from './CreateProduct.vue';
 import DeleteConfirmationModal from './DeleteConfirmationModal.vue';
+import VariantProduct from './VariantProduct.vue';   
+
 import axios from 'axios';
 
 export default {
   components: {
     EditProductModal,
     CreateProduct,
+    //CODE VARIANTES
+    VariantProduct,
     DeleteConfirmationModal
   },
   data() {
@@ -69,6 +77,9 @@ export default {
       showDeleteModal: false,
       deleteProductId: null, // ID del producto a eliminar
       selectedProduct: null,
+      //Codigo de variantes
+      showVariantModal: false,
+      selectedProductId: null,
       
     };
   },
@@ -145,7 +156,7 @@ closeEditModal() {
   this.showEditModal = false;
 }
 
-
+  
 
 ,
     openCreateModal() {
@@ -206,14 +217,26 @@ closeEditModal() {
     console.error('Error al obtener los productos:', error);
   }
 }
+
+
+
 ,
 getImageUrl(product) {
   return product.image && product.image.startsWith('http')
     ? product.image
     : `${window.location.origin}/storage/${product.image}`;
 }
-,
-    
+,    
+
+  //Metodo de variantes 
+  handleVariant(productId) {
+        this.selectedProductId = productId;
+        this.showVariantModal = true;
+      },
+      closeVariantModal() {
+        this.showVariantModal = false;
+        this.selectedProductId = null;
+      },
   }
   
 };
@@ -252,6 +275,21 @@ h2 {
   border-radius: 4px;
   margin-right: 10px;
 }
+
+.variant-button {
+  display: inline-block;
+  background-color: #34a853;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.variant-button:hover {
+  background-color: #2c8c47;
+}
+
 .edit-button {
   background-color: #f0f0f0;
   color: #333;
