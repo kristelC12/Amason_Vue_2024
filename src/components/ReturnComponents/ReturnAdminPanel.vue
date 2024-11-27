@@ -36,8 +36,56 @@
     </div>
   </template>
 
-  
 
+<script>
+import api from '../../../services/api'
+
+export default {
+  data() {
+    return {
+      loading: true, // Inicialmente en true mientras se cargan los datos
+      returns: [] // Array para almacenar las devoluciones
+    };
+  },
+  created() {
+    this.fetchReturns(); // Llama a la función para obtener los datos cuando el componente se crea
+  },
+  methods: {
+  async fetchReturns() {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Token de autorización no encontrado');
+      }
+
+      const response = await api.get('/order-returns', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Accede directamente a response.data
+      const data = response.data;
+      // Accede al array de devoluciones dentro del objeto de respuesta
+      this.returns = data.returns.map(returnItem => ({
+        id: returnItem.id,
+        date: returnItem.date,
+        returnDate: returnItem.return_date,
+        status: returnItem.status,
+        reason: returnItem.reason,
+        adminNotes: returnItem.admin_notes,
+        orderId: returnItem.order_id,
+        userId: returnItem.user_id,
+        createdAt: returnItem.created_at,
+        updatedAt: returnItem.updated_at
+      }));
+    } catch (error) {
+      console.error('Error al obtener las devoluciones:', error);
+    } finally {
+      this.loading = false; // Cambia loading a false una vez que los datos se han cargado
+    }
+  }
+} 
+};
+</script>
 <style scoped>
 /* Reutiliza los estilos de TicketComponent.vue */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
