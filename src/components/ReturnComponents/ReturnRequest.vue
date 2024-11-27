@@ -29,6 +29,10 @@
     },
     methods: {
       async submitReturnRequest() {
+        if (this.reason.length < 10) {
+      alert('La razón de la devolución debe tener al menos 10 caracteres.');
+      return;
+    }
         try {
           const response = await api.post('/order-return', {
             order_id: this.orderId,

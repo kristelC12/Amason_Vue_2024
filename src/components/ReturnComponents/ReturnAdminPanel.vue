@@ -12,7 +12,7 @@
             <thead>
               <tr>
                 <th>Orden</th>
-                <th>Producto</th>
+           
                 <th>Motivo</th>
                 <th>Estado</th>
                 <th>Acciones</th>
@@ -21,7 +21,7 @@
             <tbody>
               <tr v-for="returnItem in returns" :key="returnItem.id">
                 <td data-label="Orden">{{ returnItem.id }}</td>
-                <td data-label="Producto">{{ returnItem.product }}</td>
+              
                 <td data-label="Motivo">{{ returnItem.reason }}</td>
                 <td data-label="Estado">{{ returnItem.status }}</td>
                 <td data-label="Acciones">
