@@ -8,27 +8,65 @@
         style="width: 128px; height: auto"
       />
     </router-link>
+
+    
     <div class="search-container">
-      <input type="text" placeholder="Buscar artículo" aria-label="Buscar" />
-      <button type="button" aria-label="Buscar">
-        <i class="fas fa-search" aria-hidden="true"></i>
-      </button>
+  <input
+    type="text"
+    placeholder="Buscar artículo"
+    aria-label="Buscar"
+    v-model="searchQuery"
+    @keyup.enter="handleSearch"
+  />
+  <button
+  type="button"
+  aria-label="Buscar"
+  @click.prevent="handleSearch"
+>
+  <i class="fas fa-search" aria-hidden="true"></i>
+</button>
+
+</div>
+
+<!-- Combobox de categorías -->
+<div class="category-dropdown">
+      <select v-model="selectedCategory" @change="filterByCategory">
+        <option disabled value="">Selecciona una categoría</option>
+        <option v-for="category in categories" :key="category.id" :value="category.id">
+          {{ category.name }}
+        </option>
+      </select>
     </div>
+
 
     <ul>
       <li>
-        <a href="#">
-          <div class="line-1">Hola, usuario</div>
-          <div class="line-2">Cuenta y listas</div>
-        </a>
+        <router-link to="/trending">
+          <div class="line-1">En</div>
+          
+          <a class="trending line-2" href="">Tendencia</a>
+        </router-link>
+       
       </li>
+      <li>
+        <router-link to="/Orders">
+          <div class="line-1">Mis</div>
+          <div class="line-2">Pedidos</div>
+        </router-link>
+      </li>
+      
       <!-- Opción "Ver Tickets" para admin -->
-      <li v-if="isAdminOrUser">
-        <a href="#" @click.prevent="goToTickets">
-          <div class="line-1">Devoluciones y</div>
-          <div class="line-2">Servicio al cliente</div>
-        </a>
-      </li>
+      <!-- Opción "Ver Tickets" para admin -->
+<li v-if="isAdminOrUser" class="dropdown">
+  <a href="#">
+    <div class="line-1">Devoluciones y</div>
+    <div class="line-2">Servicio al cliente</div>
+  </a>
+  <ul class="dropdown-content">
+    <li><a href="#" @click.prevent="goToTickets">Ver Tickets</a></li>
+    <li><a href="#" @click.prevent="goToReturnPanel">Devoluciones</a></li>  
+  </ul>
+</li>
       <li class="cart-container">
         <router-link to="/Carrito">
           <div class="line-1"><i class="fa-solid fa-cart-shopping"></i></div>
@@ -38,12 +76,14 @@
           <PopUpCart />
         </div>
       </li>
+      
       <li>
         <a href="#" @click.prevent="logout">
           <div class="line-1">Cerrar</div>
           <div class="line-2">sesión</div>
         </a>
       </li>
+     
     </ul>
 
     <div class="bottom-nav">
@@ -82,34 +122,109 @@
 </template>
 
 <script>
-import PopUpCart from '../CartComponents/PopUpCart.vue'
-import { logoutUser } from '../../../api/auth'
+import PopUpCart from '../CartComponents/PopUpCart.vue';
+import { logoutUser } from '../../../api/auth';
+import axios from 'axios';
 
 export default {
+  data() {
+    return {
+      searchQuery: '', // Campo de búsqueda
+      selectedCategory: null, // Para la categoría abierta (si es necesario)
+      categories: [], // Lista de categorías
+    };
+  },
   components: {
-    PopUpCart
+    PopUpCart,
   },
   computed: {
     isAdminOrUser() {
       const role = localStorage.getItem('userRole');
       return role && (role.includes('admin') || role.includes('user'));
-    }
+    },
+  },
+  watch: {
+  '$route.query.name': {
+    handler(newQuery) {
+      console.log(`Buscando productos con el término: ${newQuery}`);
+      this.fetchProducts(newQuery); // Llama al método de búsqueda con el nuevo término
+    },
+    immediate: true, // Ejecuta el handler al montar el componente
+  },
+},
+async created() {
+    await this.fetchCategories(); // Cargar categorías al montar el componente
   },
   methods: {
+
+    async fetchCategories() {
+      try {
+        const response = await axios.get('http://localhost:8000/api/categories');
+        this.categories = response.data; // Suponiendo que devuelve un array de categorías
+      } catch (error) {
+        console.error('Error al cargar categorías:', error);
+      }
+    },
+
+    async filterByCategory() {
+      if (this.selectedCategory) {
+        this.$router.push({
+          name: 'ProductList',
+          query: { categoryId: this.selectedCategory },
+        });
+      }
+    },
+    
+    async fetchProducts(query) {
+  try {
+    const response = await axios.get('http://localhost:8000/api/products/search', {
+      params: { name: query },
+    });
+    this.products = response.data; // Actualiza la lista de productos
+  } catch (error) {
+    console.error('Error al buscar productos:', error);
+    this.products = []; // Limpia la lista si ocurre un error
+  }
+}
+,
     goToTickets() {
       const role = localStorage.getItem('userRole');
       if (role && role.includes('admin')) {
         this.$router.push('/admin-tickets'); // Si es admin, redirigir a la vista de admin-tickets
       } else {
         this.$router.push('/tickets'); // Si es usuario normal, redirigir a la vista de tickets
+      } 
+    },
+    goToReturnPanel() {
+      const role = localStorage.getItem('userRole');
+      if (role && role.includes('admin')) {
+        this.$router.push('/return-admin-panel');
+      } else {
+        this.$router.push('/return-panel');
       }
     },
     logout() {
-      logoutUser() // Llamada a la función que elimina el token y redirige
-      this.$router.push('/login') // Redirige al login después del logout
-    }
+      logoutUser(); // Llamada a la función que elimina el token y redirige
+      this.$router.push('/login'); // Redirige al login después del logout
+    },
+    handleSearch() {
+  console.log('handleSearch ejecutado');
+  if (!this.searchQuery.trim()) {
+    alert('Por favor, ingrese un término de búsqueda.');
+    return;
   }
-}
+
+  this.$router.push({
+    name: 'ProductList', // Nombre correcto de la ruta
+    query: { name: this.searchQuery.trim() },
+  }).catch(err => {
+    if (err.name !== 'NavigationDuplicated') {
+      console.error(err);
+    }
+  });
+},
+  }
+};
 </script>
 
 <style scoped>
@@ -117,15 +232,38 @@ nav {
   background-color: #4babe2;
   color: white;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 35px 20px;
+  justify-content: left;
+  padding: 35px 10px;
   position: sticky;
   top: 0;
   width: 100%;
   z-index: 1000;
 }
+.trending{
+  color: white;
+  font-weight: bold;}
+  
+/* Estilo del combobox */
+.category-dropdown {
+  margin-left: 10px;
+}
 
+.category-dropdown select {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  color: #333;
+  background-color: #f9f9f9;
+  outline: none;
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+}
+
+.category-dropdown select:focus {
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
 .logo-button {
   background: none;
   border: none;
@@ -136,9 +274,9 @@ nav {
 .search-container {
   display: flex;
   align-items: center;
-  width: 100%;
+  width: 200rem;
   justify-content: center;
-  margin: 0 10px;
+  padding-left: 30px;
 }
 
 .search-container input {
@@ -159,6 +297,7 @@ nav {
   cursor: pointer;
   line-height: 2rem;
   border-radius: 0 5px 5px 0;
+  
 }
 
 .line-1 {
@@ -318,4 +457,40 @@ i {
 .no-scroll {
   overflow: hidden;
 }
+</style>
+
+<style scoped>
+/* ... código existente ... */
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  border-radius: 5px;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* ... código existente ... */
 </style>

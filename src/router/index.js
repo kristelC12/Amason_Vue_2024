@@ -13,14 +13,21 @@ import sellerDashboard from '@/views/LoginViews/sellerDashboard.vue'
 import ProductList from '@/components/MenuComponents/ListOfProducts&ProductDetails/ProductList.vue';
 import AdminTicket from '@/components/TicketsComponents/AdminTicket.vue';
 import CheckOut from '@/components/CartComponents/CheckOut.vue';
+import ReturnPanelView from '@/views/LoginViews/ReturnPanelView.vue';
+import ReturnAdminPanelView from '@/views/LoginViews/ReturnAdminPanelView.vue';
+import ReturnRequestView from '@/views/LoginViews/ReturnRequestView.vue';
+import ReturnAdminNotes from '@/components/ReturnComponents/ReturnAdminNotes.vue';
 import ReviewRatingsView from '@/views/LoginViews/ReviewRatingsView.vue';
 import WriteReviewView from '@/views/LoginViews/WriteReviewView.vue';
+import OrdersList from '@/components/OrderComponents/OrdersList.vue';
+import TrendingList from '@/components/MenuComponents/ListOfProducts&ProductDetails/TrendingList.vue';
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-
-
+    
+    
     {
       path: '/tickets',
       name: 'Tickets',
@@ -52,8 +59,8 @@ const router = createRouter({
             component: CartView
           },
           {
-            path: '/CheckOut',
-            name: 'CheckOut',
+            path: '/Checkout',
+            name: 'Checkout',
             component: CheckOut
           },
           {
@@ -61,6 +68,29 @@ const router = createRouter({
             name: 'Tickets',
             component: TicketsView
           },
+          {
+            path: '/return-panel',
+            name: 'ReturnPanel',
+            component: ReturnPanelView
+          },
+          {
+            path: '/return-admin-panel',
+            name: 'ReturnAdminPanel',
+            component: ReturnAdminPanelView
+          },
+          {
+            path: '/return-request/:orderId',
+            name: 'ReturnRequestView',
+            component: ReturnRequestView,
+            props: true
+          },
+          {
+            path: '/return-admin-notes/:returnId',
+            name: 'ReturnAdminNotes',
+            component: ReturnAdminNotes,
+            props: true
+          },
+
           {
             path: '/create-ticket',
             name: 'CreateTicket',
@@ -86,6 +116,11 @@ const router = createRouter({
             path: '/reviewsrating',
             name: 'ReviewsRating',
             component: ReviewRatingsView,
+          },
+          {
+            path: '/orders',
+            name: 'OrdersList',
+            component: OrdersList,
           }
         ],
         
@@ -116,6 +151,12 @@ const router = createRouter({
           name: 'ProductList',
           component: ProductList
         },
+        {
+          path: '/trending',
+          name: 'trending',
+          component: TrendingList
+        },
+       
         {
           path: '/Menu',
           name: 'Menu',
@@ -167,6 +208,7 @@ const router = createRouter({
       component: ReportComponent,
       props: true,
     },
+   
   
   ]
 })

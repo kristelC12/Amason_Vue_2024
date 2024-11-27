@@ -16,9 +16,12 @@
                     <td data-label="Descripción" class="store-description">{{ store.description }}</td>
                     <td data-label="Email" class="store-email">{{ store.email }}</td>
                     <td data-label="Acciones" class="store-actions">
-                        <button class="btn btn-products" @click="manageProducts(index)" title="Productos">
-                            <i class="fas fa-box-open"></i>
-                        </button>
+                        <button 
+    class="btn btn-products" 
+    @click="$emit('select-store', store.Id)" 
+    title="Productos">
+    <i class="fas fa-box-open"></i>
+</button>
                         <button class="btn btn-report" @click="generateTopSellingReport(index)" title="Más Vendidos">
                             <i class="fas fa-chart-line"></i>
                         </button>
@@ -149,10 +152,12 @@ export default {
         closeSuccessMessage() {
             this.successMessage = "";
         },
-        manageProducts(index) {
-            
-            this.$emit("change-view", "SellerProduct");
-        },
+        methods: {
+    manageProducts(index) {
+        const selectedStoreId = this.stores[index].Id;
+        this.$emit("change-view", "SellerProduct", selectedStoreId); // Pasar el storeId seleccionado
+        }
+    },
         generateTopSellingReport(index) {
             const storeId = this.stores[index].location_id;
             this.$router.push({ path: `/report/${storeId}` });

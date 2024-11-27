@@ -32,8 +32,9 @@
                 @store-deleted="handleStoreDeleted"
                 @update-stores="updateStores"
                 @change-view="view = $event"
+                 @select-store="handleSelectStore"
             />
-            <SellerProduct v-if="view === 'SellerProduct'" @open-create-product="openCreateProductModal" />
+            <SellerProduct v-if="view === 'SellerProduct'" :storeId="selectedStoreId" @open-create-product="openCreateProductModal" />
         </main>
 
    
@@ -62,6 +63,7 @@ export default {
         return {
             view: "create",
             stores: [],
+            selectedStoreId: null,
             showCreateProductModal: false,
             isCollapsed: false,
             showLogoutPopup: false,
@@ -98,6 +100,11 @@ export default {
         handleStoreDeleted(storeId) {
             this.stores = this.stores.filter(store => store.id !== storeId); // Filtrar la tienda eliminada
         },
+        handleSelectStore(storeId) {
+    console.log("ID de tienda seleccionado:", storeId); // Depuración
+    this.selectedStoreId = storeId;
+    this.view = 'SellerProduct';
+  },
         logout() {
             this.showLogoutPopup = true;
         },
@@ -122,6 +129,8 @@ export default {
             }
         }
     }
+    
+
 };
 </script>
 

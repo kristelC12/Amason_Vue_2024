@@ -7,16 +7,11 @@
         <!-- Nombre del Producto -->
         <div class="form-group">
           <label for="name">Nombre del Producto</label>
-          <input
-            type="text"
-            id="name"
-            v-model="localProduct.name"
-            required
-          />
+          <input type="text" id="name" v-model="localProduct.name" required />
         </div>
 
-       <!-- Categoría -->
-       <div class="form-group">
+        <!-- Categoría -->
+        <div class="form-group">
           <label for="category_id">Categoría</label>
           <select id="category" v-model="localProduct.category_id" required>
             <option disabled value="">Seleccione una categoría</option>
@@ -28,13 +23,22 @@
             <option value="6">Beauty & Personal Care</option>
           </select>
         </div>
+
         <!-- Precio -->
         <div class="form-group">
           <label for="price">Precio</label>
+          <input type="text" id="price" v-model="localProduct.price" required />
+        </div>
+
+        <!-- Descuento -->
+        <div class="form-group">
+          <label for="discount">Descuento (%)</label>
           <input
-            type="text"
-            id="price"
-            v-model="localProduct.price"
+            type="number"
+            id="discount"
+            v-model.number="localProduct.discount"
+            min="0"
+            max="100"
             required
           />
         </div>
@@ -42,34 +46,19 @@
         <!-- Stock -->
         <div class="form-group">
           <label for="stock">Stock</label>
-          <input
-            type="number"
-            id="stock"
-            v-model="localProduct.stock"
-            required
-          />
+          <input type="number" id="stock" v-model="localProduct.stock" required />
         </div>
 
         <!-- Descripción -->
         <div class="form-group">
           <label for="description">Descripción</label>
-          <textarea
-            id="description"
-            v-model="localProduct.description"
-            rows="3"
-            required
-          ></textarea>
+          <textarea id="description" v-model="localProduct.description" rows="3" required></textarea>
         </div>
 
-        <!-- Links de Imágenes -->
+        <!-- Subir Imágenes -->
         <div class="form-group">
-          <label for="image_links">Links de Imágenes (separados por comas)</label>
-          <textarea
-            id="image_links"
-            v-model="imageLinksText"
-            rows="3"
-            placeholder="Ingresa los links de las imágenes, separados por comas"
-          ></textarea>
+          <label for="images">Subir Imágenes</label>
+          <input type="file" id="images" @change="handleImageUpload" multiple />
         </div>
 
         <!-- Botones de acción -->
@@ -83,6 +72,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   props: {
     product: Object,
@@ -91,41 +82,88 @@ export default {
   data() {
     return {
       showModal: true,
-      localProduct: { ...this.product }, // Asignar el producto recibido
-    imageLinksText: this.product.image_links ? this.product.image_links.join(', ') : '', // Convertir los enlaces a un string
-  };
-},
-watch: {
-  product: {
-    immediate: true,
-    handler(newProduct) {
-      this.localProduct = { ...newProduct };
-      this.imageLinksText = newProduct.images ? newProduct.images.map(image => image.image_path).join(', ') : '';
-    }}},
+      localProduct: { ...this.product },
+      selectedImages: [], // Imágenes seleccionadas
+    };
+  },
   methods: {
     closeModal() {
-      this.$emit('close');
+      this.$emit("close");
     },
-    saveChanges() {
-  // Convertimos el texto de los links de imágenes en un array
-  const imageLinks = (this.imageLinksText || '')
-    .split(',')
-    .map((link) => link.trim())
-    .filter((link) => link); // Filtramos posibles valores vacíos
 
-  // Actualizar el producto con los links de imágenes
-  const updatedProduct = {
-        ...this.localProduct,
-        image_links: imageLinks, // Añadir los links de imágenes actualizados
-      };
+    handleImageUpload(event) {
+      this.selectedImages = Array.from(event.target.files); // Guardar las imágenes seleccionadas
+      console.log("Imágenes seleccionadas:", this.selectedImages);
+    },
 
-  // Llamamos al método 'save' para enviar los datos actualizados al padre
-  this.$emit('save', updatedProduct);
-  this.closeModal();
-}
-  }};
+    async saveChanges() {
+      try {
+        // Actualizar datos básicos del producto
+        const updatedProduct = {
+          name: this.localProduct.name,
+          description: this.localProduct.description,
+          price: this.localProduct.price,
+          stock: this.localProduct.stock,
+          category_id: this.localProduct.category_id,
+          discount: this.localProduct.discount, // Agregar el descuento
+        };
 
+        // Realiza la actualización de datos básicos
+        await axios.put(
+          `http://localhost:8000/api/products/${this.localProduct.product_id}`,
+          updatedProduct
+        );
+
+        // Si hay imágenes seleccionadas, actualízalas por separado
+        if (this.selectedImages.length > 0) {
+          await this.updateProductImages(this.localProduct.product_id);
+        }
+
+        // Emitir evento para sincronizar con el padre
+        this.$emit("save", this.localProduct);
+        this.closeModal();
+      } catch (error) {
+        console.error(
+          "Error al guardar los datos del producto:",
+          error.response?.data || error.message
+        );
+      }
+    },
+
+    async updateProductImages(productId) {
+      try {
+        const formData = new FormData();
+
+        // Adjuntar cada imagen seleccionada al FormData
+        this.selectedImages.forEach((image, index) => {
+          formData.append(`images[${index}]`, image);
+        });
+
+        // Llamada a la API para actualizar las imágenes
+        const response = await axios.post(
+          `http://localhost:8000/api/products/${productId}/images`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        console.log("Imágenes actualizadas:", response.data);
+      } catch (error) {
+        console.error(
+          "Error al actualizar las imágenes:",
+          error.response?.data || error.message
+        );
+        throw error; // Lanzar error para manejarlo en el método padre
+      }
+    },
+  },
+};
 </script>
+
+
 
 <style scoped>
 .modal-overlay {
@@ -138,15 +176,21 @@ watch: {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 10px; /* Espacio interno para pantallas pequeñas */
+  box-sizing: border-box;
+  overflow-y: auto; /* Permite desplazamiento en caso de contenido largo */
 }
 
 .modal-content {
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
-  width: 350px;
+  width: 100%; /* Ancho completo para pantallas pequeñas */
+  max-width: 500px; /* Ancho máximo en pantallas grandes */
+  max-height: 90vh; /* Limitar altura al 90% de la ventana */
   position: relative;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  overflow-y: auto; /* Desplazamiento interno si el contenido supera el tamaño */
 }
 
 .close {
@@ -188,23 +232,52 @@ watch: {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
+  flex-wrap: wrap; /* Permitir ajuste en pantallas pequeñas */
+}
+
+.cancel-button,
+.save-button {
+  flex: 1;
+  margin: 5px;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
 }
 
 .cancel-button {
   background-color: #e74c3c;
   color: #f0f0f0;
   border: 1px solid #e74c3c;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .save-button {
   background-color: #0ea5e9;
   color: white;
-  padding: 10px 20px;
   border: none;
-  border-radius: 4px;
-  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .modal-title {
+    font-size: 18px;
+  }
+
+  .form-group label {
+    font-size: 14px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .cancel-button,
+  .save-button {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
 }
 </style>
+

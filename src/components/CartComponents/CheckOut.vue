@@ -113,6 +113,7 @@ export default {
       tooltipVisible: false,
       selectedMethod: 'card', // Inicializa el valor seleccionado
       order_id: '',
+      orderCompleted: false,
       user: {
         name: '',
         phone: '',
@@ -142,19 +143,20 @@ export default {
     },
 
     formatExpDate() {
-      let expDate = this.user.expDate.replace(/\D/g, '')
+      let expDate = this.user.expDate.replace(/\D/g, '');
       if (expDate.length > 2) {
-        expDate = expDate.slice(0, 2) + '/' + expDate.slice(2, 4)
+        expDate = expDate.slice(0, 2) + '/' + expDate.slice(2, 4);
       }
-      this.user.expDate = expDate
+      this.user.expDate = expDate;
     },
 
+
     formatPhoneNumber() {
-      let phoneNumber = this.user.phone_number.replace(/\D/g, '')
+      let phoneNumber = this.user.phone_number.replace(/\D/g, '');
       if (phoneNumber.length > 4) {
-        phoneNumber = phoneNumber.slice(0, 4) + ' ' + phoneNumber.slice(4, 8)
+        phoneNumber = phoneNumber.slice(0, 4) + ' ' + phoneNumber.slice(4, 8);
       }
-      this.user.phone_number = phoneNumber
+      this.user.phone_number = phoneNumber;
     },
 
     selectPaymentMethod(method) {
@@ -208,36 +210,32 @@ export default {
     },
 
     validateExpDate() {
-      const expDate = document.getElementById('exp').value
+      const expDate = document.getElementById('exp').value;
 
-      const [month, year] = expDate.split('/').map(Number)
+      const [month, year] = expDate.split('/').map(Number);
       if (month < 1 || month > 12) {
-        alert('Fecha de expiración inválida.')
-        return false
+        alert('Fecha de expiración inválida.');
+        return false;
       }
 
-      const currentYear = new Date().getFullYear() % 100
-      const currentMonth = new Date().getMonth() + 1
+      const currentYear = new Date().getFullYear() % 100;
+      const currentMonth = new Date().getMonth() + 1;
 
       if (year < currentYear || (year === currentYear && month < currentMonth)) {
-        alert('La tarjeta está expirada.')
-        return false
+        alert('La tarjeta está expirada.');
+        return false;
       }
 
-      return true
+      return true;
     },
 
     // Formatear número de tarjeta
     formatCardNumber() {
-      this.user.cardNumber = this.user.cardNumber
-        .replace(/\s+/g, '')
-        .replace(/[^0-9]/gi, '')
-        .replace(/(.{4})/g, '$1 ')
-        .trim()
+      this.user.cardNumber = this.user.cardNumber.replace(/\s+/g, '').replace(/[^0-9]/gi, '').replace(/(.{4})/g, '$1 ').trim();
 
       this.$nextTick(() => {
-        document.getElementById('cardNumber').value = this.user.cardNumber
-      })
+        document.getElementById('cardNumber').value = this.user.cardNumber;
+      });
     },
 
     // Validar y completar la orden
@@ -247,12 +245,17 @@ export default {
 
         if (banderaInfo) {
           if (window.confirm('¿Desea completar la compra?')) {
-            this.procesarOrden({
+            const procesado = await this.procesarOrden({
               paymentMethod: this.user.paymentMethod,
               cardNumber: this.user.cardNumber
             })
-            this.removeAllProductsFromCart()
-            this.$router.push('/Menu')
+            if (procesado && procesado.status === 400) {
+              alert(procesado.data.message)
+            } else {
+              this.removeAllProductsFromCart()
+              this.orderCompleted = true;
+              this.$router.push('/Menu')
+            }
           }
         }
       }
@@ -263,14 +266,16 @@ export default {
         const response = await api.post('/order/process', datosOrden, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+          },
         })
 
         if (response.status === 404) {
           alert('Orden no encontrada')
         }
       } catch (error) {
-        console.error('Error al procesar la orden:', error)
+        if (error.response && error.response.status === 400) {
+          return error.response;
+        }
       }
     },
 
@@ -278,26 +283,28 @@ export default {
       try {
         const response = await api.get('/deliveryInformation', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
+        });
 
         if (response.status === 200) {
-          this.user = response.data
+          this.user = response.data;
         }
       } catch (error) {
         if (error.response && error.response.status === 404) {
-          alert('No se encontró información de envío.')
+          alert('No se encontró información de envío.');
         }
-        return false
+        return false;
       }
     },
 
+
     async actualizarInformacionUsuario(user) {
       try {
-        await api.put('/deliveryInformation', user, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
+        await api.put('/deliveryInformation', user,
+          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+        )
 
-        return true
+        return true;
+
       } catch (error) {
         console.error('Error al actualizar la información del usuario:', error)
       }
@@ -305,60 +312,66 @@ export default {
 
     async cancelarOrden() {
       try {
+
+        console.log(localStorage.getItem('order_id'));
         // Lógica para cancelar la orden
-        await api.post(
-          '/order/cancel',
-          { order_id: localStorage.getItem('order_id') },
+        await api.post('/order/cancel',
+          { order_id: localStorage.getItem('order_id'), user_id: localStorage.getItem('userId')},
           {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           }
-        )
-        console.log('Orden cancelada exitosamente.')
+        );
+        console.log('Orden cancelada exitosamente.');
       } catch (error) {
-        console.error('Error al cancelar la orden:', error)
+        console.error('Error al cancelar la orden:', error);
       }
     },
+
     cancelarOrdenSync() {
-      const orderId = localStorage.getItem('order_id')
-      const token = localStorage.getItem('token')
+      const orderId = localStorage.getItem('order_id');
+      const token = localStorage.getItem('token');
 
       if (!orderId || !token) {
-        console.warn('No hay información de orden o token disponible.')
-        return
+        console.warn('No hay información de orden o token disponible.');
+        return;
       }
 
       // Usar sendBeacon para enviar la cancelación de manera síncrona
-      const url = 'http://localhost:8000/api/order/cancel'
-      const payload = JSON.stringify({ order_id: orderId, user_id: localStorage.getItem('userId') })
-      const blob = new Blob([payload], { type: 'application/json' })
+      const url = 'http://localhost:8000/api/order/cancel';
+      const payload = JSON.stringify({ order_id: orderId, user_id: localStorage.getItem('userId') });
+      const blob = new Blob([payload], { type: 'application/json' });
 
-      const siwi = navigator.sendBeacon(url, blob)
+      const siwi = navigator.sendBeacon(url, blob);
       if (siwi) {
-        console.log('Orden cancelada con sendBeacon.')
+        console.log('Orden cancelada con sendBeacon.');
       } else {
-        console.error('Error al cancelar la orden con sendBeacon.')
+        console.error('Error al cancelar la orden con sendBeacon.');
       }
-    }
+    },
   },
   mounted() {
     // Lógica de inicialización
     this.obtenerInformacionUsuario().then(() => {
-      this.user.paymentMethod = 'card'
-    })
 
-    this.order_id = localStorage.getItem('order_id')
+      this.user.paymentMethod = 'card';
+    });
+
+    this.order_id = localStorage.getItem('order_id');
 
     // Agregar listener para beforeunload (cerrar navegador o pestaña)
-    window.addEventListener('beforeunload', this.cancelarOrdenSync)
+    window.addEventListener('beforeunload', this.cancelarOrdenSync);
   },
 
   beforeUnmount() {
     // Remover el listener para evitar fugas de memoria
-    window.removeEventListener('beforeunload', this.cancelarOrdenSync)
+    window.removeEventListener('beforeunload', this.cancelarOrdenSync);
 
     // Cancelar la orden explícitamente al desmontar el componente
-    this.cancelarOrden()
+    if (!this.orderCompleted) {
+      this.cancelarOrden();
+    }
   }
+
 }
 </script>
 
