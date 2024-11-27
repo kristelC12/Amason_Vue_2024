@@ -83,7 +83,6 @@ const cart = {
     async addProductToCart({ commit, dispatch, state }, product) {
       if (state.isAdding) return;  // Si ya está procesando, sale de la función
       commit('setIsAdding', true);  // Cambia el estado a "agregando"
-    
       try {
         const existingProductIndex = state.cart.findIndex(p => p.product_id === product.product_id);
     

@@ -6,23 +6,21 @@
         <i class="fa-solid fa-arrow-left"></i>
       </button>
       <div class="productos">
-        <div
-          v-for="(producto, index) in displayedProducts"
-          :key="producto.product_id"
-          :class="['producto-card', index === 1 ? 'current' : '']"
-        >
+        <div v-for="(producto, index) in displayedProducts" :key="producto.product_id"
+          :class="['producto-card', index === 1 ? 'current' : '']">
           <div class="producto-card-content">
             <div class="discount-badge" v-if="producto.discount && index === 1">
               {{ producto.discount }}% off
             </div>
-            <img :src="producto.images[0]?.image_path" alt="Imagen del producto" class="product-image" />
-            <h4 class="producto-name">{{ producto.name }}</h4>
-            <p class="producto-price">₡ {{ producto.price }}</p>
+            <img :src="producto.product_image" alt="Imagen del producto" class="product-image" />
+            <h4 class="producto-name">{{ producto.product_name }}</h4>
+            <p class="producto-price">₡ {{ producto.product_price }}</p>
             <p v-if="producto.discount" class="original-price">
-                    Precio Original: ₡ {{ calculateOriginalPrice(producto) }}
+              Precio Original: ₡ {{ calculateOriginalPrice(producto) }}
             </p>
-            
-            <button class="buy-button">Comprar</button>
+
+            <i v-if="producto.isAdding" class="fa-solid fa-spinner fa-spin-pulse fa-2x" :style="{ cursor: 'not-allowed' }"></i>
+            <i v-else @click="addProduct(producto)" class="fas fa-cart-plus fa-2x" :style="{ cursor: 'pointer' }"></i>
           </div>
         </div>
       </div>
@@ -33,9 +31,9 @@
   </div>
 </template>
 
-
 <script>
 import axios from 'axios';
+import { mapActions } from 'vuex';
 
 export default {
   data() {
@@ -45,21 +43,21 @@ export default {
     };
   },
   computed: {
-  displayedProducts() {
-    const total = this.recomendaciones.length;
+    displayedProducts() {
+      const total = this.recomendaciones.length;
 
-    // Si hay menos de 3 productos, muestra solo uno
-    if (total < 3) {
-      return [this.recomendaciones[this.currentIndex]];
+      // Si hay menos de 3 productos, muestra solo uno
+      if (total < 3) {
+        return [this.recomendaciones[this.currentIndex]];
+      }
+
+      return [
+        this.recomendaciones[(this.currentIndex - 1 + total) % total], // Producto anterior
+        this.recomendaciones[this.currentIndex], // Producto actual
+        this.recomendaciones[(this.currentIndex + 1) % total] // Producto siguiente
+      ];
     }
-
-    return [
-      this.recomendaciones[(this.currentIndex - 1 + total) % total], // Producto anterior
-      this.recomendaciones[this.currentIndex], // Producto actual
-      this.recomendaciones[(this.currentIndex + 1) % total] // Producto siguiente
-    ];
-  }
-},
+  },
 
   async mounted() {
     try {
@@ -68,19 +66,41 @@ export default {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
-      this.recomendaciones = response.data;
+      this.recomendaciones = response.data.map(item => {
+        return {
+          product_description: item.description,
+          product_id: item.product_id,
+          product_name: item.name,
+          product_price: item.price,
+          product_stock: item.stock,
+          product_image: item.images[0]?.image_path,
+          isAdding: false // Añadir la propiedad isAdding a cada producto
+        };
+      });
     } catch (error) {
       console.error('Error al obtener recomendaciones:', error);
     }
   },
   methods: {
+    ...mapActions('cart', ['addProductToCart']),
+
+    async addProduct(product) {
+      product.isAdding = true;
+      try {
+        await this.addProductToCart(product);
+      } catch (error) {
+        console.error('Error adding product to cart:', error);
+      } finally {
+        product.isAdding = false;
+      }
+    },
+
     nextProduct() {
       this.currentIndex = (this.currentIndex + 1) % this.recomendaciones.length;
     },
 
-
     calculateOriginalPrice(producto) {
-      return (producto.price / (1 - producto.discount / 100)).toFixed(2);
+      return (producto.product_price / (1 - producto.discount / 100)).toFixed(2);
     },
     prevProduct() {
       this.currentIndex =
@@ -193,19 +213,29 @@ export default {
 .buy-button:hover {
   background-color: #058dc3;
 }
+
 .original-price {
   font-size: 14px;
   color: #777;
   text-decoration: line-through;
 }
 
+i {
+  cursor: pointer;
+  color: black;
+}
+
+.fa-spinner {
+  color: #f1a80b;
+}
+
 @media (max-width: 900px) {
   .productos {
     justify-content: center;
   }
+
   .producto-card:not(.current) {
     display: none;
   }
 }
-
 </style>
