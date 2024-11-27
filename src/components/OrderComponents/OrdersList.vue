@@ -3,6 +3,9 @@
     <div class="header-container">
       <h2>Mis Órdenes</h2>
     </div>
+    <div v-if="loading" class="loading-indicator">
+      <p>Cargando órdenes...</p>
+    </div>
     <div class="task-list-container">
       <div class="task-item" v-for="(order, index) in orders" :key="index">
         <div class="task-header">
@@ -37,7 +40,8 @@
   export default {
     data() {
       return {
-        orders: []  
+        orders: [],  
+        loading: false,
       }
     },
   
@@ -63,6 +67,9 @@
               }
               if (order.status === 3) {
                 order.statusText = 'Cancelada';
+              }
+              if (order.status === 4) {
+                order.statusText = 'Devolución Solicitada';
               }
               return order;
             });
@@ -95,7 +102,12 @@
   font-family: Arial, sans-serif;
   color: #333;
 }
-
+.loading-indicator {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  margin: 20px 0;
+}
 .task-item {
   display: flex;
   flex-direction: column;
