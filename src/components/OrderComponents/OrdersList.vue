@@ -1,5 +1,8 @@
 <template>
   <div class="menu-view">
+    <div class="header-container">
+      <h2>Mis Órdenes</h2>
+    </div>
     <div class="task-list-container">
       <div class="task-item" v-for="(order, index) in orders" :key="index">
         <div class="task-header">
@@ -154,6 +157,11 @@
   font-size: 12px;
   color: #000;
 }
+.header h2 {
+    font-size: 2rem;
+    color: #34495e;
+    margin-bottom: 10px;
+  }
 
 .options-button {
   border: none;
@@ -192,5 +200,19 @@
   
   flex-direction: column;
   min-height: 66vh;
+}
+.header-container {
+  display: flex;
+  justify-content: center; /* Centra el contenido horizontalmente */
+  align-items: center; /* Centra el contenido verticalmente */
+  padding: 20px; /* Espaciado alrededor del texto */
+  border-radius: 5px; /* Bordes redondeados */
+  margin-bottom: 20px; /* Espacio debajo del contenedor */
+}
+
+.header-container h2 {
+  font-size: 2rem; /* Tamaño de fuente */
+  color: #34495e; /* Color del texto */
+  margin: 0; /* Elimina el margen por defecto */
 }
 </style>

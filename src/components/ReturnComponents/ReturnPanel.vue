@@ -23,7 +23,7 @@
                 <td data-label="Motivo">{{ returnItem.reason }}</td>
                 <td data-label="Estado">{{ returnItem.status }}</td>
                 <td>
-                <button @click="cancelRequest(returnItem.id)" class="cancel-button">Cancelar Solicitud</button>
+                <button @click="closeReturn(returnItem.id)" class="cancel-button">Cerrar Devolución</button>
               </td>
               </tr>
             </tbody>
@@ -52,7 +52,7 @@
         if (confirm("¿Estás seguro de que deseas cerrar esta devolución?")) {
           console.log("Cerrando devolución con ID:", returnId); // Para depuración
           try {
-            await apiClient.put(`/returns/${returnId}/close`, {}, {
+            await apiClient.delete(`/order-return/${returnId}`, {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`
               }
@@ -89,19 +89,7 @@
           this.loading = false;
         }
       },
-      async cancelRequest(returnId) {
-        console.log("Cancelando solicitud con ID:", returnId); // Para depuración
-      try {
-        await apiClient.delete(`/order-return/${returnId}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        this.fetchUserReturns(); // Actualiza la lista de devoluciones
-      } catch (error) {
-        console.error('Error al cancelar la solicitud:', error);
-      }
-    }
+      
   }
 };
 </script>
@@ -161,6 +149,7 @@
     padding: 15px;
     text-align: left;
     border-bottom: 1px solid #ddd;
+    
   }
   
   .return-table th {
