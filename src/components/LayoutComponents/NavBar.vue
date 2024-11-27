@@ -41,6 +41,14 @@
 
     <ul>
       <li>
+        <router-link to="/trending">
+          <div class="line-1">En</div>
+          
+          <a class="trending line-2" href="">Tendencia</a>
+        </router-link>
+       
+      </li>
+      <li>
         <router-link to="/Orders">
           <div class="line-1">Mis</div>
           <div class="line-2">Pedidos</div>
@@ -68,18 +76,14 @@
           <PopUpCart />
         </div>
       </li>
+      
       <li>
         <a href="#" @click.prevent="logout">
           <div class="line-1">Cerrar</div>
           <div class="line-2">sesión</div>
         </a>
       </li>
-      <li>
-        <router-link to="/trending">
-          <a class="trending" href="">Trending</a>
-        </router-link>
-       
-      </li>
+     
     </ul>
 
     <div class="bottom-nav">
@@ -229,7 +233,8 @@ nav {
   color: white;
   display: flex;
   align-items: center;
-  padding: 35px 20px;
+  justify-content: left;
+  padding: 35px 10px;
   position: sticky;
   top: 0;
   width: 100%;
@@ -241,7 +246,7 @@ nav {
   
 /* Estilo del combobox */
 .category-dropdown {
-  margin-left: 20px;
+  margin-left: 10px;
 }
 
 .category-dropdown select {
@@ -269,9 +274,9 @@ nav {
 .search-container {
   display: flex;
   align-items: center;
-  width: 20rem;
+  width: 200rem;
   justify-content: center;
-  margin: 0 10px;
+  padding-left: 30px;
 }
 
 .search-container input {

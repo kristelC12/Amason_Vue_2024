@@ -12,18 +12,19 @@
             <thead>
               <tr>
                 <th>Orden</th>
-                <th>Producto</th>
                 <th>Motivo</th>
                 <th>Estado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="returnItem in returns" :key="returnItem.id">
-                <td data-label="Orden">{{ returnItem.order }}</td>
-                <td data-label="Producto">{{ returnItem.product }}</td>
+                <td data-label="Orden">{{ returnItem.id }}</td>
                 <td data-label="Motivo">{{ returnItem.reason }}</td>
                 <td data-label="Estado">{{ returnItem.status }}</td>
-           
+                <td>
+                <button @click="cancelRequest(returnItem.id)" class="cancel-button">Cancelar Solicitud</button>
+              </td>
               </tr>
             </tbody>
           </table>
@@ -48,25 +49,28 @@
     },
     methods: {
       async closeReturn(returnId) {
-        console.log("Cerrando devolución con ID:", returnId); // Para depuración
-        try {
-          await apiClient.put(`/returns/${returnId}/close`, {}, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-          });
-          this.fetchUserReturns(); // Actualiza la lista de devoluciones
-        } catch (error) {
-          console.error('Error al cerrar la devolución:', error);
+        if (confirm("¿Estás seguro de que deseas cerrar esta devolución?")) {
+          console.log("Cerrando devolución con ID:", returnId); // Para depuración
+          try {
+            await apiClient.put(`/returns/${returnId}/close`, {}, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+              }
+            });
+            this.fetchUserReturns(); // Actualiza la lista de devoluciones
+          } catch (error) {
+            console.error('Error al cerrar la devolución:', error);
+          }
         }
       },
       async fetchUserReturns() {
         try {
           const token = localStorage.getItem('token');  
+          const userId = localStorage.getItem('userId');
           if (!token) {
             throw new Error('Token de autenticación no disponible');
           }
-          const response = await apiClient.get('/user-returns', {
+          const response = await apiClient.get(`/order-returns/user/${userId}`, {
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${localStorage.getItem('token')}`,  
@@ -84,10 +88,23 @@
         } finally {
           this.loading = false;
         }
+      },
+      async cancelRequest(returnId) {
+        console.log("Cancelando solicitud con ID:", returnId); // Para depuración
+      try {
+        await apiClient.delete(`/order-return/${returnId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        this.fetchUserReturns(); // Actualiza la lista de devoluciones
+      } catch (error) {
+        console.error('Error al cancelar la solicitud:', error);
       }
     }
-  };
-  </script>
+  }
+};
+</script>
   
   <style scoped>
   /* Reutiliza los estilos de TicketComponent.vue */
