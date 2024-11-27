@@ -159,7 +159,7 @@ export default {
         }
     },
         generateTopSellingReport(index) {
-            const storeId = this.stores[index].location_id;
+            const storeId = this.stores[index].Id;
             this.$router.push({ path: `/report/${storeId}` });
         }
     }

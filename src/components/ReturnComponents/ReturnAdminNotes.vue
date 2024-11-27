@@ -16,32 +16,56 @@
   </template>
   
   <script>
+  import api from '../../../services/api'
+  
   export default {
-    props: {
-      returnId: {
-        type: String,
-        required: true
-      }
-    },
     data() {
       return {
-        adminNotes: ''
-      };
+        adminNotes: '',
+        actionType: null
+      }
+    },
+    computed: {
+      returnId() {
+        return this.$route.params.returnId;
+      }
     },
     methods: {
-      acceptReturn() {
-        // Lógica para aceptar la devolución
-        console.log('Devolución aceptada:', this.returnId, this.adminNotes);
-      },
-      cancelReturn() {
-        // Lógica para cancelar la devolución
-        console.log('Devolución cancelada:', this.returnId, this.adminNotes);
+      async acceptReturn() {
+      this.actionType = 'accept';
+      await this.submitAction();
+    },
+    async cancelReturn() {
+      this.actionType = 'cancel';
+      await this.submitAction();
+    },
+      async submitAction() {
+        if (!this.actionType) {
+          alert('Por favor, selecciona una acción.');
+          return;
+        }
+  
+        try {
+          const response = await api.put(`/order-return/${this.returnId}`, {
+            status: this.actionType === 'accept' ? 'approved' : 'rejected',
+            admin_notes: this.adminNotes
+          }, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          });
+  
+          if (response.status === 200) {
+            alert('Acción realizada con éxito.');
+            this.$router.push({ name: 'ReturnAdminPanel' }); // Redirigir al panel de administración
+          }
+        } catch (error) {
+          alert('Hubo un error al realizar la acción.');
+        }
       },
       exitView() {
         this.$router.push('/return-admin-panel');
       }
     }
-  };
+  }
   </script>
   
   <style scoped>
