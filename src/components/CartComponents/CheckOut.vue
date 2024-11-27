@@ -38,13 +38,14 @@
               <div class="payment__types">
                 <div class="payment__type payment__type--cc" :class="{ active: selectedMethod === 'card' }"
                   @click="selectPaymentMethod('card')">
-                  <i class="fa-solid fa-credit-card fa-xl" style="color: #21246e"></i>
-                  <p>Tarjeta Crédito/Débito</p>
-                </div>
-                <div class="payment__type payment__type--paypal" :class="{ active: selectedMethod === 'paypal' }"
-                  @click="selectPaymentMethod('paypal')">
-                  <i class="fa-brands fa-paypal fa-2xl" style="color: #21246e"></i>
-                  <p>Paypal</p>
+                  <p>Tarjeta Crédito/Débito:</p>
+                  <i class="fa-brands fa-cc-mastercard fa-xl" style="color: #21246e"></i>
+                  <i class="fa-brands fa-cc-visa fa-xl" style="color: #21246e"></i>
+                  <i class="fa-brands fa-cc-apple-pay fa-xl" style="color: #21246e"></i>
+                  <i class="fa-brands fa-cc-jcb fa-xl" style="color: #21246e"></i>
+                  <i class="fa-brands fa-google-pay fa-xl" style="color: #21246e"></i>
+                  <img src="@/assets/american-ex.svg" alt="AmericanExpress" width="32" height="32"
+                    style="color: #21246e" />
                 </div>
               </div>
             </div>
@@ -63,9 +64,7 @@
                   <input type="text" id="cardNumber" name="cardNumber" placeholder="Enter Card Number"
                     v-model="user.cardNumber" maxlength="19" @input="formatCardNumber" />
                   <div class="payment-icons">
-                    <i class="fa-brands fa-cc-mastercard fa-xl" style="color: #21246e"></i>
-                    <i class="fa-brands fa-cc-visa fa-xl" style="color: #21246e"></i>
-                    <i class="fa-brands fa-cc-apple-pay fa-xl" style="color: #21246e"></i>
+                    <i class="fa-solid fa-credit-card fa-xl" style="color: #21246e"></i>
                   </div>
                 </div>
               </div>
@@ -82,7 +81,7 @@
                 <div v-if="tooltipVisible" class="tooltip-text">
                   Los tres dígitos en la parte posterior de tu tarjeta
                 </div>
-                <input type="password" id="cvv" name="cvv" placeholder="***" maxlength="3" />
+                <input type="password" id="cvv" name="cvv" placeholder="****" maxlength="4" minlength="3" />
               </div>
             </div>
           </div>
@@ -95,7 +94,9 @@
     <div class="actions">
       <button @click="completeOrder" type="button" class="btn action__submit">
         Completar la Orden
-        <i class="icon icon-arrow-right-circle"></i>
+      </button>
+      <button @click="cancelarOrden" type="button" class="btn action__cancel">
+        Cancelar
       </button>
     </div>
   </div>
@@ -104,7 +105,6 @@
 <script>
 import api from '../../../services/api'
 import { mapActions } from 'vuex'
-
 
 export default {
   name: 'CheckoutComponent',
@@ -256,7 +256,6 @@ export default {
               this.orderCompleted = true;
               this.$router.push('/Menu')
             }
-
           }
         }
       }
@@ -273,7 +272,6 @@ export default {
         if (response.status === 404) {
           alert('Orden no encontrada')
         }
-
       } catch (error) {
         if (error.response && error.response.status === 400) {
           return error.response;
@@ -309,12 +307,12 @@ export default {
 
       } catch (error) {
         console.error('Error al actualizar la información del usuario:', error)
-
       }
     },
 
     async cancelarOrden() {
       try {
+
         console.log(localStorage.getItem('order_id'));
         // Lógica para cancelar la orden
         await api.post('/order/cancel',
@@ -350,11 +348,11 @@ export default {
         console.error('Error al cancelar la orden con sendBeacon.');
       }
     },
-    
   },
   mounted() {
     // Lógica de inicialización
     this.obtenerInformacionUsuario().then(() => {
+
       this.user.paymentMethod = 'card';
     });
 
@@ -409,9 +407,8 @@ export default {
 /* Métodos de pago */
 .payment__types {
   display: flex;
+  
   justify-content: center;
-  align-content: center;
-  align-self: center;
   gap: 10px;
   width: 500px;
   height: 70px;
@@ -419,7 +416,7 @@ export default {
 
 .payment_methods,
 .payment__shipping {
-  flex: 1;
+
   justify-content: center;
   align-content: center;
   align-self: center;
@@ -430,7 +427,7 @@ export default {
   padding: 10px 20px;
   border-radius: 10px;
   cursor: pointer;
-  flex: 1;
+
   text-align: center;
   display: flex;
   align-items: center;
@@ -523,9 +520,9 @@ textarea {
 /* Texto del tooltip */
 .tooltip-text {
   position: absolute;
-  bottom: 125%;
+  bottom: 110%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-70%);
   background-color: #333;
   color: #fff;
   padding: 5px 10px;
@@ -577,7 +574,8 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 30px;
   padding: 20px 0 40px 0;
 }
 
@@ -587,7 +585,7 @@ textarea {
   letter-spacing: 1px;
   color: #fff;
   background-color: #f1a80b;
-  padding: 20px 60px;
+  padding: 20px 35px;
   white-space: nowrap;
   font-size: 16px;
   line-height: 1;
@@ -596,42 +594,12 @@ textarea {
   text-decoration: none;
 }
 
-.btn .icon {
-  margin-left: 10px;
-  font-size: 20px;
-}
-
 .btn:hover {
   -webkit-transform: translateY(-1px);
   transform: translateY(-1px);
   background-color: #f0ba47;
   cursor: pointer;
 }
-
-/* Responsivo */
-/* @media (max-width: 768px) {
-  .row-container {
-    flex-direction: column;
-  }
-
-  .form-group {
-    width: 100%;
-  }
-}
-
-@media (max-width: 500px) {
-
-  .card-pay,
-  .card-information {
-    width: 100%;
-    padding: 10px 20px;
-  }
-
-  .form-group input {
-    padding: 10px;
-    font-size: 12px;
-  }
-} */
 
 @media (width < 990px) {
   main {
@@ -658,16 +626,19 @@ textarea {
   }
 
   .payment__types {
-    width: 100%;
+    width: auto;
     display: flex;
-    justify-content: space-evenly;
+    height: auto;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .payment__type {
     display: flex;
     width: auto;
     padding: 0 10px;
-    justify-content: center;
+    justify-content: initial;
+    flex-wrap: wrap;
   }
 
   .card-information {
@@ -699,6 +670,10 @@ textarea {
 
   .payment-icons {
     right: 7px;
+  }
+
+  .actions {
+    flex-direction: column;
   }
 }
 </style>
