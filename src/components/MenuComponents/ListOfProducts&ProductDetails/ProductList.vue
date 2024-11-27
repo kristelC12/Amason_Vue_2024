@@ -115,6 +115,9 @@ export default {
         console.error("Error al cargar productos por nombre:", error);
       }
     },
+    async mounted() {
+      await this.fetchProductsByCategory(this.$route.query.categoryId);
+    }
   },
 };
 </script>
