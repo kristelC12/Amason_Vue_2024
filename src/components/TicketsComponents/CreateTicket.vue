@@ -9,10 +9,9 @@
           <label for="order-package">Orden o Paquete</label>
           <select v-model="ticket.orderPackage" class="form-input" required>
             <option value="" disabled selected>Selecciona una opción</option>
-            <option value="Orden 1">Orden 1</option>
-            <option value="Orden 2">Orden 2</option>
-            <option value="Paquete A">Paquete A</option>
-            <option value="Paquete B">Paquete B</option>
+            <option v-for="order in orders" :key="order.id" :value="order.order_id">
+              Orden: {{ order.order_id }} <!-- Ajusta según la estructura de tus datos -->
+            </option>
           </select>
         </div>
   
@@ -82,10 +81,26 @@ export default {
         notifySMS: false,
         phoneNumber: '',
         files: Array(5).fill(null)
-      }
+      },
+      orders: [],
     };
   },
   methods: {
+    async fetchOrders() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Token de autorización no encontrado');
+        }
+        const response = await apiClient.get('/orders/user-history', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        console.log('Datos de órdenes:', response.data); // Añade este log
+        this.orders = response.data; // Asegúrate de que 'orders' es el campo correcto
+      } catch (error) {
+        console.error('Error al obtener las órdenes:', error.response);
+      }
+    },
     handleFileUpload(index) {
       const input = event.target;
       if (input.files.length > 0) {
@@ -125,11 +140,17 @@ export default {
         });
 
         console.log('Ticket creado:', response.data);
+        this.$router.push('/tickets');
       } catch (error) {
         console.error('Error creando el ticket:', error.response);
       }
+    
+  },
+},
+    
+    async mounted() {
+      await this.fetchOrders(); // Llamar al método cuando el componente se monte
     }
-  }
 };
 </script>
 <style scoped>
