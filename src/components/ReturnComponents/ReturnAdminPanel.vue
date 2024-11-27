@@ -25,7 +25,7 @@
                 <td data-label="Motivo">{{ returnItem.reason }}</td>
                 <td data-label="Estado">{{ returnItem.status }}</td>
                 <td data-label="Acciones">
-                  <button class="btn btn-accept" @click="(returnItem.id)">Añadir Notas</button>
+                  <button class="btn btn-accept" @click="navigateTo(`/return-admin-notes/${returnItem.id}`)">Añadir Notas</button>
                 </td>
               </tr>
             </tbody>
@@ -82,6 +82,9 @@ export default {
     } finally {
       this.loading = false; // Cambia loading a false una vez que los datos se han cargado
     }
+  },
+  navigateTo(path) {
+    this.$router.push(path);
   }
 } 
 };
